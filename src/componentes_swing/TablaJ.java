@@ -1,13 +1,18 @@
 package componentes_swing;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.util.Vector;
 
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
+
+import clases.dto.TipoDocumentoDTO;
 
 public class TablaJ extends JTable{
 
@@ -28,5 +33,6 @@ public class TablaJ extends JTable{
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
 	}
+	
 	
 }

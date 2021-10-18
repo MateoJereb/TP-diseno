@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -20,6 +22,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 import clase_app.App;
+import clases.dto.PasajeroDTO;
+import clases.dto.TipoDocumentoDTO;
+import clases.gestores.GestorPasajeros;
 import componentes_swing.*;
 import componentes_swing.modelos_tablas.ModeloTablaPasajeros;
 import componentes_swing.retroalimentacion.*;
@@ -56,6 +61,9 @@ public class GestionarPasajeros extends JPanel {
 		panelBusqueda();
 		panelResultados();
 		panelBotones();
+		
+		buscar.setNextFocusableComponent(siguiente);
+		cancelar.setNextFocusableComponent(cApellido);
 	}
 	
 	private void panelBusqueda() {
@@ -139,7 +147,59 @@ public class GestionarPasajeros extends JPanel {
 		cons.insets = new Insets(0,20,10,20);
 		panelBusqueda.add(buscar,cons);
 		
-		
+		buscar.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				PasajeroDTO datos = new PasajeroDTO();
+				datos.setApellido(cApellido.getText());
+				datos.setNombre(cNombre.getText());
+				
+				if(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getId() != -1) {
+					datos.setIdTipoDoc(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getId());
+				}
+				
+				if(cNroDoc.getText().length() > 0) {
+					datos.setNro_doc(cNroDoc.getText());
+				}
+				
+				GestorPasajeros gestor = GestorPasajeros.getInstance();
+				List<PasajeroDTO> resultado = gestor.buscarPasajeros(datos);
+				actualizarTabla(resultado);
+				
+				if(resultado.size() == 0) {
+					MensajeInformativo noHayResultados = new MensajeInformativo(App.getVentana(),"<html><body>No se encontraron resultados que coincidan con los<br>criterios de búsqueda.</body></html>","Dar alta de pasajero","Nueva búsqueda");
+					App.getVentana().setEnabled(false);
+					noHayResultados.pack();
+					noHayResultados.setLocationRelativeTo(null);
+					noHayResultados.setVisible(true); 
+					
+					noHayResultados.addWindowListener(new WindowAdapter() {
+						public void windowClosing(WindowEvent e) {
+							App.getVentana().setEnabled(true);
+							App.getVentana().setVisible(true);
+						}
+					});
+					
+					ActionListener listenerAlta = new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							App.darAltaPasajero(cApellido.getText(), cNombre.getText(), (TipoDocumentoDTO)lTipoDoc.getSelectedItem(), cNroDoc.getText());
+						}					
+					};
+					
+					ActionListener listenerNuevaBusqueda = new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							noHayResultados.dispose();
+							App.getVentana().setEnabled(true);
+							App.getVentana().setVisible(true);
+						}					
+					};
+					
+					noHayResultados.setListeners(listenerAlta, listenerNuevaBusqueda);
+				}
+			}
+		});
 	}
 	
 	private void panelResultados() {
@@ -173,7 +233,7 @@ public class GestionarPasajeros extends JPanel {
 		tabla.getColumnModel().getColumn(2).setPreferredWidth(20);
 		tabla.getColumnModel().getColumn(3).setPreferredWidth(75);
 		
-		modelo.setData(new Vector<Vector<Object>>()); //Cambiarlo por los datos
+		actualizarTabla(new ArrayList<PasajeroDTO>());
 		
 		cons.gridy = 0;
 		panelResultados.add(scroll,cons);
@@ -209,8 +269,19 @@ public class GestionarPasajeros extends JPanel {
 		siguiente.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+				Integer fila = tabla.getSelectedRow();
 				
+				if(fila == -1) {
+					String apellido = cApellido.getText();
+					String nombre = cNombre.getText();
+					TipoDocumentoDTO tipoDoc = (TipoDocumentoDTO) lTipoDoc.getSelectedItem();
+					String nroDoc = cNroDoc.getText();
+					
+					App.darAltaPasajero(cApellido.getText(), cNombre.getText(), (TipoDocumentoDTO)lTipoDoc.getSelectedItem(), cNroDoc.getText());
+				}
+				else {
+					//Modificar
+				}
 			}
 		});
 		
@@ -253,6 +324,24 @@ public class GestionarPasajeros extends JPanel {
 				ventanaAux.setListeners(listenerSi, listenerNo);	
 			}
 		});
+	}
+	
+	private void actualizarTabla(List<PasajeroDTO> pasajeros) {
+		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+		
+		for(PasajeroDTO p : pasajeros) {
+			Vector<Object> fila = new Vector<Object>();
+			
+			fila.add(p.getApellido().get());
+			fila.add(p.getNombre().get());
+			fila.add(p.getTipo().get());
+			fila.add(p.getNro_doc().get());
+			
+			data.add(fila);
+		}
+		
+		modelo.setData(data);
+		modelo.fireTableDataChanged();
 	}
 	
 }

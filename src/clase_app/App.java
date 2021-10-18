@@ -1,11 +1,11 @@
 package clase_app;
 
 import java.awt.Image;
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
+import clases.dto.*;
 import componentes_swing.ventanas.*;
 
 public class App {
@@ -46,6 +46,14 @@ public class App {
 		GestionarPasajeros panel = new GestionarPasajeros();
 		ventana.setContentPane(panel);
 		ventana.setTitle("Hotel Premier - Gestionar Pasajeros");
+		ventana.revalidate();
+		ventana.repaint();
+	}
+	
+	public static void darAltaPasajero(String apellido, String nombre, TipoDocumentoDTO tipoDoc, String nroDoc) {
+		DarAltaPasajero panel = new DarAltaPasajero(apellido,nombre,tipoDoc,nroDoc);
+		ventana.setContentPane(panel);
+		ventana.setTitle("Hotel Premier - Dar de Alta Pasajero");
 		ventana.revalidate();
 		ventana.repaint();
 	}

@@ -4,6 +4,7 @@ import java.util.Optional;
 
 public class Direccion {
 
+	private Integer idDireccion;
 	private String calle;
 	private String numero;
 	private String departamento;
@@ -13,9 +14,9 @@ public class Direccion {
 	private Localidad localidad;
 	
 		
-	public Direccion(String calle, String numero, String departamento, Integer piso, Pasajero pasajero,
+	public Direccion(Integer idDireccion, String calle, String numero, String departamento, Integer piso, Pasajero pasajero,
 			Localidad localidad) {
-		super();
+		this.idDireccion = idDireccion;
 		this.calle = calle;
 		this.numero = numero;
 		this.departamento = departamento;
@@ -24,6 +25,10 @@ public class Direccion {
 		this.localidad = localidad;
 	}
 
+	public Integer getId() {
+		return idDireccion;
+	}
+	
 	public String getCalle() {
 		return calle;
 	}
@@ -46,6 +51,67 @@ public class Direccion {
 	
 	public Localidad getLocalidad() {
 		return localidad;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((calle == null) ? 0 : calle.hashCode());
+		result = prime * result + ((departamento == null) ? 0 : departamento.hashCode());
+		result = prime * result + ((idDireccion == null) ? 0 : idDireccion.hashCode());
+		result = prime * result + ((localidad == null) ? 0 : localidad.hashCode());
+		result = prime * result + ((numero == null) ? 0 : numero.hashCode());
+		result = prime * result + ((pasajero == null) ? 0 : pasajero.hashCode());
+		result = prime * result + ((piso == null) ? 0 : piso.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Direccion other = (Direccion) obj;
+		if (calle == null) {
+			if (other.calle != null)
+				return false;
+		} else if (!calle.equals(other.calle))
+			return false;
+		if (departamento == null) {
+			if (other.departamento != null)
+				return false;
+		} else if (!departamento.equals(other.departamento))
+			return false;
+		if (idDireccion == null) {
+			if (other.idDireccion != null)
+				return false;
+		} else if (!idDireccion.equals(other.idDireccion))
+			return false;
+		if (localidad == null) {
+			if (other.localidad != null)
+				return false;
+		} else if (!localidad.equals(other.localidad))
+			return false;
+		if (numero == null) {
+			if (other.numero != null)
+				return false;
+		} else if (!numero.equals(other.numero))
+			return false;
+		if (pasajero == null) {
+			if (other.pasajero != null)
+				return false;
+		} else if (!pasajero.equals(other.pasajero))
+			return false;
+		if (piso == null) {
+			if (other.piso != null)
+				return false;
+		} else if (!piso.equals(other.piso))
+			return false;
+		return true;
 	}
 	
 	
