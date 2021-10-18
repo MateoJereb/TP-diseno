@@ -17,7 +17,6 @@ import java.util.Properties;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
-import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
@@ -44,7 +43,7 @@ public class DarAltaPasajero extends JPanel {
 	private EtiquetaJ eNroDoc;
 	private CampoJ cNroDoc;
 	private EtiquetaJ eCUIT;
-	private CampoJ cCUIT;
+	private CampoJMascara cCUIT;
 	private EtiquetaJ eRespIva;
 	private ListaPosicionIVA lRespIva;
 	private EtiquetaJ eFechaNac;
@@ -90,11 +89,11 @@ public class DarAltaPasajero extends JPanel {
 		setLayout(new GridBagLayout());
 		setBackground(UIManager.getColor("CheckBox.focus"));
 		
-		panelDatos();
+		panelDatos(apellidoCargado,nombreCargado,tipoDocCargado,nroDocCargado);
 		listeners();
 	}
 	
-	private void panelDatos() {
+	private void panelDatos(String apellidoCargado, String nombreCargado, TipoDocumentoDTO tipoDocCargado, String nroDocCargado) {
 		
 		GridBagConstraints cons = new GridBagConstraints();
 		TitledBorder borde  = BorderFactory.createTitledBorder("Datos");
@@ -136,19 +135,18 @@ public class DarAltaPasajero extends JPanel {
 		panelDatos.add(datosDer, cons);
 		
 		eApellido = new EtiquetaJ("Apellido");
-		cApellido = new CampoJ();
+		cApellido = new CampoJ(apellidoCargado);
 		eNombre = new EtiquetaJ("Nombre");
-		cNombre = new CampoJ();
+		cNombre = new CampoJ(nombreCargado);
 		eTipoDoc = new EtiquetaJ("Tipo de documento");
-		lTipoDoc = new ListaTipoDoc();
+		lTipoDoc = new ListaTipoDoc(tipoDocCargado);
 		eNroDoc = new EtiquetaJ("Nro. documento");
-		cNroDoc = new CampoJ();
+		cNroDoc = new CampoJ(nroDocCargado);
 		eCUIT = new EtiquetaJ("CUIT");
-		cCUIT = new CampoJ("xx-xxxxxxxx-x");
+		cCUIT = new CampoJMascara();
 		eRespIva = new EtiquetaJ("Responsable IVA");
 		lRespIva = new ListaPosicionIVA();
 		eFechaNac = new EtiquetaJ("Fecha de Nacimiento");
-		//Datepicker
 		eTelefono = new EtiquetaJ("Teléfono");
 		cTelefono = new CampoJ();
 		eEmail = new EtiquetaJ("Email");
@@ -266,6 +264,8 @@ public class DarAltaPasajero extends JPanel {
 		cons.anchor = GridBagConstraints.CENTER;
 		cons.weightx = 0.15;
 		cons.fill = GridBagConstraints.HORIZONTAL;
+		cCUIT.setPlaceholder("xx-xxxxxxxx-x");
+		cCUIT.setPhColor(Color.DARK_GRAY);
 		datosIzq.add(cCUIT,cons);
 		
 		cons.gridy=5;
@@ -590,7 +590,6 @@ public class DarAltaPasajero extends JPanel {
 			
 	}
 	
-
 	private void listeners() {
 		lPais.addItemListener(new ItemListener() {
 			@Override

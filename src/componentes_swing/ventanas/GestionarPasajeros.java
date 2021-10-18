@@ -183,6 +183,9 @@ public class GestionarPasajeros extends JPanel {
 					ActionListener listenerAlta = new ActionListener() {
 						@Override
 						public void actionPerformed(ActionEvent e) {
+							noHayResultados.dispose();
+							App.getVentana().setEnabled(true);
+							App.getVentana().setVisible(true);
 							App.darAltaPasajero(cApellido.getText(), cNombre.getText(), (TipoDocumentoDTO)lTipoDoc.getSelectedItem(), cNroDoc.getText());
 						}					
 					};
@@ -271,12 +274,7 @@ public class GestionarPasajeros extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				Integer fila = tabla.getSelectedRow();
 				
-				if(fila == -1) {
-					String apellido = cApellido.getText();
-					String nombre = cNombre.getText();
-					TipoDocumentoDTO tipoDoc = (TipoDocumentoDTO) lTipoDoc.getSelectedItem();
-					String nroDoc = cNroDoc.getText();
-					
+				if(fila == -1) {					
 					App.darAltaPasajero(cApellido.getText(), cNombre.getText(), (TipoDocumentoDTO)lTipoDoc.getSelectedItem(), cNroDoc.getText());
 				}
 				else {

@@ -39,7 +39,7 @@ public class AdministradorBDPasajero extends AdministradorBD {
 		}
 		
 		if(filtros.getNro_doc().isPresent()) {
-			consulta+=" AND pj.nro_doc = '"+filtros.getNro_doc()+"'";
+			consulta+=" AND pj.nro_doc = '"+filtros.getNro_doc().get()+"'";
 		}
 		
 		consulta+=" ORDER BY 1";

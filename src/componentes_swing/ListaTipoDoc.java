@@ -32,6 +32,22 @@ public class ListaTipoDoc extends JComboBox<TipoDocumentoDTO> {
 		setRenderer(new MyCellRenderer(this));
 	}
 	
+	public ListaTipoDoc(TipoDocumentoDTO seleccionado) {
+		super();
+		setFont(new Font("Microsoft Tai Le",Font.PLAIN,12));
+		setBackground(Color.WHITE);
+		
+		addItem(new TipoDocumentoDTO(-1,""));
+		
+		GestorPasajeros gestor = GestorPasajeros.getInstance();
+		List<TipoDocumentoDTO> tipos = gestor.buscarTiposDocumento();
+		for(TipoDocumentoDTO t : tipos) addItem(t);
+		
+		setSelectedItem(seleccionado);
+		
+		setRenderer(new MyCellRenderer(this));
+	}
+	
 	class MyCellRenderer extends JLabel implements ListCellRenderer{
 		
 		private JComboBox lista;
