@@ -186,7 +186,9 @@ public class GestionarPasajeros extends JPanel {
 							noHayResultados.dispose();
 							App.getVentana().setEnabled(true);
 							App.getVentana().setVisible(true);
-							App.darAltaPasajero(cApellido.getText(), cNombre.getText(), (TipoDocumentoDTO)lTipoDoc.getSelectedItem(), cNroDoc.getText());
+							TipoDocumentoDTO tipo = (TipoDocumentoDTO)lTipoDoc.getSelectedItem();
+							if(tipo.getId() == -1) tipo = new TipoDocumentoDTO(1,"DNI"); //Si no selecciono ninguno, precarga DNI por ser el valor predeterminado
+							App.darAltaPasajero(cApellido.getText(), cNombre.getText(), tipo, cNroDoc.getText());
 						}					
 					};
 					
@@ -275,7 +277,10 @@ public class GestionarPasajeros extends JPanel {
 				Integer fila = tabla.getSelectedRow();
 				
 				if(fila == -1) {					
-					App.darAltaPasajero(cApellido.getText(), cNombre.getText(), (TipoDocumentoDTO)lTipoDoc.getSelectedItem(), cNroDoc.getText());
+					TipoDocumentoDTO tipo = (TipoDocumentoDTO)lTipoDoc.getSelectedItem();
+					if(tipo.getId() == -1) tipo = new TipoDocumentoDTO(1,"DNI"); //Si no selecciono ninguno, precarga DNI por ser el valor predeterminado
+						
+					App.darAltaPasajero(cApellido.getText(), cNombre.getText(), tipo, cNroDoc.getText());
 				}
 				else {
 					//Modificar
