@@ -6,7 +6,7 @@ import javax.swing.table.AbstractTableModel;
 
 public class ModeloTablaPasajeros extends AbstractTableModel {
 
-	String[] columnNames = {"Apellido","Nombre","Tipo documento","Nro. documento"};
+	String[] columnNames = {"Apellido","Nombre","Tipo documento","Nro. documento",""};
 	Vector<Vector<Object>> data;
 	
 	@Override

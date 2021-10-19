@@ -7,27 +7,47 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 
+import clase_app.App;
+import clases.dto.LocalidadDTO;
 import clases.dto.PaisDTO;
+import clases.dto.PasajeroDTO;
+import clases.dto.PosicionIVADTO;
 import clases.dto.ProvinciaDTO;
 import clases.dto.TipoDocumentoDTO;
+import clases.gestores.GestorPasajeros;
 import componentes_swing.*;
+import componentes_swing.retroalimentacion.*;
 
 public class DarAltaPasajero extends JPanel {
 
@@ -72,6 +92,7 @@ public class DarAltaPasajero extends JPanel {
 	private EtiquetaJ eLocalidad;
 	private ListaLocalidades lLocalidad;
 	private EtiquetaJ camposObligatorios;
+	private EtiquetaJ camposInvalidos;
 	private BotonJ siguiente;
 	private BotonJ cancelar;
 	
@@ -90,7 +111,9 @@ public class DarAltaPasajero extends JPanel {
 		setBackground(UIManager.getColor("CheckBox.focus"));
 		
 		panelDatos(apellidoCargado,nombreCargado,tipoDocCargado,nroDocCargado);
-		listeners();
+		listeners(apellidoCargado,nombreCargado,tipoDocCargado,nroDocCargado);
+		
+		lRespIva.setNextFocusableComponent(datePicker.getComponent(1));
 	}
 	
 	private void panelDatos(String apellidoCargado, String nombreCargado, TipoDocumentoDTO tipoDocCargado, String nroDocCargado) {
@@ -139,7 +162,11 @@ public class DarAltaPasajero extends JPanel {
 		eNombre = new EtiquetaJ("Nombre");
 		cNombre = new CampoJ(nombreCargado);
 		eTipoDoc = new EtiquetaJ("Tipo de documento");
-		lTipoDoc = new ListaTipoDoc(tipoDocCargado);
+		
+		TipoDocumentoDTO tipo = tipoDocCargado;
+		if(tipo.getId() == -1) tipo = new TipoDocumentoDTO(1,"DNI"); //Si no selecciono ninguno, precarga DNI por ser el valor predeterminado
+		lTipoDoc = new ListaTipoDoc(tipo);
+		
 		eNroDoc = new EtiquetaJ("Nro. documento");
 		cNroDoc = new CampoJ(nroDocCargado);
 		eCUIT = new EtiquetaJ("CUIT");
@@ -174,8 +201,10 @@ public class DarAltaPasajero extends JPanel {
 		camposObligatorios = new EtiquetaJ("Campos obligatorios");
 		siguiente = new BotonJ("Siguiente");
 		cancelar = new BotonJ("Cancelar");
+		camposInvalidos = new EtiquetaJ();
+		camposInvalidos.setForeground(Color.RED);
+		camposInvalidos.setVisible(false);
 
-		
 		cons.gridx = 0;
 		cons.weightx = 0;
 		cons.weighty = 0;
@@ -304,16 +333,9 @@ public class DarAltaPasajero extends JPanel {
 		cons.anchor = GridBagConstraints.CENTER;
 		cons.weightx = 0.15;
 		cons.fill = GridBagConstraints.HORIZONTAL;
-		Properties p = new Properties();
-		p.put("text.day", "Día");
-		p.put("text.month", "Mes");
-		p.put("text.year", "Año");
-		model = new UtilDateModel();
-		datePanel = new JDatePanelImpl(model,p);
-		datePicker = new JDatePickerImpl(datePanel,new DateLabelFormatter());
+		configurarDatePicker();
 		datosIzq.add(datePicker,cons);
-		
-		
+				
 		cons.gridy=7;
 		cons.gridx = 0;
 		cons.weightx = 0;
@@ -580,17 +602,78 @@ public class DarAltaPasajero extends JPanel {
 		cons.gridx=1;
 	    panelBotones.add(camposObligatorios, cons);
 	    
-		cons.insets = new Insets(10,10,10,10);
+	    cons.gridx = 2;
+	    cons.anchor = GridBagConstraints.EAST;
+	    cons.insets = new Insets(10,10,10,10);
 	    cons.weightx=0;
-	    cons.gridx=2;
+	    panelBotones.add(camposInvalidos,cons);
+	    cons.gridx=3;
 	    cons.anchor= GridBagConstraints.EAST;
 	    panelBotones.add(siguiente, cons);
-	    cons.gridx=3;
+	    cons.gridx=4;
 	    panelBotones.add(cancelar, cons);
 			
 	}
 	
-	private void listeners() {
+	private void configurarDatePicker() {
+		Properties p = new Properties();
+		p.put("text.day", "Día");
+		p.put("text.month", "Mes");
+		p.put("text.year", "Año");
+		model = new UtilDateModel();
+		datePanel = new JDatePanelImpl(model,p);
+		datePicker = new JDatePickerImpl(datePanel,new DateLabelFormatter());
+		
+		JFormattedTextField texto = (JFormattedTextField) datePicker.getComponent(0);
+		JButton boton = (JButton) datePicker.getComponent(1);
+		
+		texto.setFont(new Font("Microsoft Tai Le",Font.PLAIN,12));
+		texto.setBackground(Color.WHITE);
+		boton.setFont(new Font("Microsoft Tai Le",Font.PLAIN,12));
+		boton.setBackground(Color.WHITE);
+		
+		ImageIcon icono = new ImageIcon("resources\\calendario.png");
+		boton.setBorder(null);
+		boton.setText("");
+		boton.setIcon(icono);
+		
+		boton.setFocusPainted(false);
+		
+		texto.getDocument().addDocumentListener(new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				cambiar();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				cambiar();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				cambiar();
+			}
+			
+			public void cambiar() {
+				texto.setBackground(Color.WHITE);
+			}
+		});
+		
+		boton.addFocusListener(new FocusListener() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				boton.setBackground(Color.LIGHT_GRAY);
+			}
+
+			@Override
+			public void focusLost(FocusEvent e) {
+				boton.setBackground(Color.WHITE);
+			}
+		});
+	}
+	
+	private void listeners(String apellidoCargado, String nombreCargado, TipoDocumentoDTO tipoDocCargado, String nroDocCargado) {
 		lPais.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -613,6 +696,305 @@ public class DarAltaPasajero extends JPanel {
 				}
 			}
 		});
+		
+		siguiente.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(obligatoriosCompletos()) {
+					if(emailValido()) {
+						if(pisoNumerico()) {
+							GestorPasajeros gestor = GestorPasajeros.getInstance();
+							
+							PasajeroDTO datos = new PasajeroDTO();
+							datos.setNro_doc(cNroDoc.getText());
+							datos.setIdTipoDoc(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getId());
+							datos.setTipo(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getTipo());
+							
+							if(gestor.dniExistente(datos)) {
+								MensajeInformativo existeDoc = new MensajeInformativo(App.getVentana(),"<html><body>¡CUIDADO! El tipo y número de documento ya<br>existen en el sistema.</body><html>","Aceptar igualmente","Corregir");
+								App.getVentana().setEnabled(false);
+								existeDoc.pack();
+								existeDoc.setLocationRelativeTo(App.getVentana());
+								existeDoc.setVisible(true);
+
+								existeDoc.addWindowListener(new WindowAdapter() {
+									public void windowClosing(WindowEvent e) {
+										App.getVentana().setEnabled(true);
+										App.getVentana().setVisible(true);
+									}
+								});
+								
+								ActionListener listenerAceptar = new ActionListener() {
+									@Override
+									public void actionPerformed(ActionEvent e) {
+										existeDoc.dispose();
+										App.getVentana().setEnabled(true);
+										App.getVentana().setVisible(true);
+										crearPasajero();
+									}									
+								};
+								
+								ActionListener listenerCorregir = new ActionListener() {
+									@Override
+									public void actionPerformed(ActionEvent e) {
+										
+										existeDoc.dispose();
+										App.getVentana().setEnabled(true);
+										App.getVentana().setVisible(true);
+										lTipoDoc.requestFocus();
+									}
+								};
+								
+								existeDoc.setListeners(listenerAceptar, listenerCorregir);
+							}
+							else {
+								crearPasajero();
+							}
+						}
+						else {
+							cPiso.setBackground(new Color(255,200,200));
+							cPiso.requestFocus();
+							camposInvalidos.setText("El piso debe ser numérico");
+							camposInvalidos.setVisible(true);
+						}
+					}
+					else {
+						cEmail.setBackground(new Color(255,200,200));
+						cEmail.requestFocus();
+						camposInvalidos.setText("Ingrese un tipo de mail valido");
+						camposInvalidos.setVisible(true);
+					}
+				}
+				else {
+					camposInvalidos.setText("Campos obligatorios incompletos");
+					camposInvalidos.setVisible(true);
+				}
+			}
+		});
+		
+		cancelar.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				MensajeConfirmacion confirmacion = new MensajeConfirmacion(App.getVentana(),"¿Desea cancelar el alta del pasajero?","Sí","No");
+				App.getVentana().setEnabled(false);
+				confirmacion.pack();
+				confirmacion.setLocationRelativeTo(App.getVentana());
+				confirmacion.setVisible(true); 
+				
+				confirmacion.addWindowListener(new WindowAdapter() {
+					public void windowClosing(WindowEvent e) {
+						App.getVentana().setEnabled(true);
+						App.getVentana().setVisible(true);
+					}
+				});
+				
+				ActionListener listenerSi = new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						confirmacion.dispose();
+						App.getVentana().setEnabled(true);
+						App.getVentana().setVisible(true);
+						App.gestionarPasajeros(apellidoCargado,nombreCargado,tipoDocCargado,nroDocCargado);
+					}
+				};
+				
+				ActionListener listenerNo = new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						confirmacion.dispose();
+						App.getVentana().setEnabled(true);
+						App.getVentana().setVisible(true);
+					}
+				};
+				
+				confirmacion.setListeners(listenerSi,listenerNo);
+			}
+		});
+
 	}
 
+	private Boolean obligatoriosCompletos() {
+		Boolean validos = true;
+		
+		if(((LocalidadDTO)lLocalidad.getSelectedItem()).getIdLocalidad() == -1) {
+			validos = false;
+			lLocalidad.setBackground(new Color(255,200,200));
+			lLocalidad.requestFocus();
+		}
+		
+		if(((ProvinciaDTO)lProvincia.getSelectedItem()).getIdProv() == -1) {
+			validos = false;
+			lProvincia.setBackground(new Color(255,200,200));
+			lProvincia.requestFocus();
+		}
+		
+		if(cCodPostal.getText().length() == 0) {
+			validos = false;
+			cCodPostal.setBackground(new Color(255,200,200));
+			cCodPostal.requestFocus();
+		}
+		
+		if(cNumero.getText().length() == 0) {
+			validos = false;
+			cNumero.setBackground(new Color(255,200,200));
+			cNumero.requestFocus();
+		}
+		
+		if(cCalle.getText().length() == 0) {
+			validos = false;
+			cCalle.setBackground(new Color(255,200,200));
+			cCalle.requestFocus();
+		}
+		
+		if(cNacionalidad.getText().length() == 0) {
+			validos = false;
+			cNacionalidad.setBackground(new Color(255,200,200));
+			cNacionalidad.requestFocus();
+		}
+		
+		if(cOcupacion.getText().length() == 0) {
+			validos = false;
+			cOcupacion.setBackground(new Color(255,200,200));
+			cOcupacion.requestFocus();
+		}
+		
+		if(cTelefono.getText().length() == 0) {
+			validos = false;
+			cTelefono.setBackground(new Color(255,200,200));
+			cTelefono.requestFocus();
+		}
+		
+		if(datePicker.getModel().getValue() == null) {
+			validos = false;
+			datePicker.getComponent(0).setBackground(new Color(255,200,200));
+			datePicker.getComponent(1).requestFocus();
+		}
+		
+		if(((PosicionIVADTO)lRespIva.getSelectedItem()).getId() == -1) {
+			validos = false;
+			lRespIva.setBackground(new Color(255,200,200));
+			lRespIva.requestFocus();
+		}
+		
+		if(cNroDoc.getText().length() == 0) {
+			validos = false;
+			cNroDoc.setBackground(new Color(255,200,200));
+			cNroDoc.requestFocus();
+		}
+		
+		if(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getId() == -1) {
+			validos = false;
+			lTipoDoc.setBackground(new Color(255,200,200));
+			lTipoDoc.requestFocus();
+		}
+		
+		if(cNombre.getText().length() == 0) {
+			validos = false;
+			cNombre.setBackground(new Color(255,200,200));
+			cNombre.requestFocus();
+		}
+		
+		if(cApellido.getText().length() == 0) {
+			validos = false;
+			cApellido.setBackground(new Color(255,200,200));
+			cApellido.requestFocus();
+		}
+		
+		return validos;
+	}
+
+	
+	private Boolean emailValido() {
+		
+        if(cEmail.getText().length() == 0) return true; //Si no escribio mail, esta bien porque es opcional
+		
+		Pattern pattern = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
+        
+        Matcher mather = pattern.matcher(cEmail.getText());
+        
+        return mather.find();
+    
+	}
+	
+	private Boolean pisoNumerico() {
+		try {
+			if(cPiso.getText().length() > 0) {
+				Integer.parseInt(cPiso.getText());
+			}
+		}
+		catch(NumberFormatException e) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private void crearPasajero() {
+		Date fechaSeleccionada = (Date) datePicker.getModel().getValue();
+		LocalDate fechaNacimiento = fechaSeleccionada.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		
+		PasajeroDTO pasajero = new PasajeroDTO();
+		
+		pasajero.setApellido(cApellido.getText());
+		pasajero.setNombre(cNombre.getText());
+		pasajero.setIdTipoDoc(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getId());
+		pasajero.setNro_doc(cNroDoc.getText());
+		if(cCUIT.getText().length() > 0) pasajero.setCuit(cCUIT.getText());
+		pasajero.setIdPosIva(((PosicionIVADTO)lRespIva.getSelectedItem()).getId());
+		pasajero.setFecha_nacimiento(fechaNacimiento);
+		pasajero.setTelefono(cTelefono.getText());
+		if(cEmail.getText().length() > 0) pasajero.setMail(cEmail.getText());
+		pasajero.setOcupacion(cOcupacion.getText());
+		pasajero.setNacionalidad(cNacionalidad.getText());
+		pasajero.setCalle(cCalle.getText());
+		pasajero.setNumero(cNumero.getText());
+		if(cPiso.getText().length() > 0) pasajero.setPiso(Integer.parseInt(cPiso.getText()));
+		if(cDepartamento.getText().length() > 0) pasajero.setDepartamento(cDepartamento.getText());
+		pasajero.setCodigo_postal(cCodPostal.getText());
+		pasajero.setIdLocalidad(((LocalidadDTO)lLocalidad.getSelectedItem()).getIdLocalidad());
+		
+		GestorPasajeros gestor = GestorPasajeros.getInstance();
+		Boolean creado = gestor.crearPasajero(pasajero);
+		
+		if(creado) {
+			MensajeInformativo pasajeroCreado = new MensajeInformativo(App.getVentana(),"El pasajero "+cNombre.getText()+" "+cApellido.getText()+"<html><body><br>ha sido satisfactoriamente cargado en el sistema.<br>¿Desea cargar otro?</body><html>","Sí","No");
+			App.getVentana().setEnabled(false);
+			pasajeroCreado.pack();
+			pasajeroCreado.setLocationRelativeTo(App.getVentana());
+			pasajeroCreado.setVisible(true);
+			
+			pasajeroCreado.addWindowListener(new WindowAdapter() {
+				public void windowClosing(WindowEvent e) {
+					App.getVentana().setEnabled(true);
+					App.getVentana().setVisible(true);
+					App.darAltaPasajero("","",new TipoDocumentoDTO(-1,""),"");
+				}
+			});
+			
+			ActionListener listenerSi = new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					pasajeroCreado.dispose();
+					App.getVentana().setEnabled(true);
+					App.getVentana().setVisible(true);
+					App.darAltaPasajero("","",new TipoDocumentoDTO(-1,""),"");
+				}				
+			};
+			
+			ActionListener listenerNo = new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					pasajeroCreado.dispose();
+					App.getVentana().setEnabled(true);
+					App.getVentana().setVisible(true);
+					App.gestionarPasajeros();
+				}				
+			};
+			
+			pasajeroCreado.setListeners(listenerSi, listenerNo);
+		}
+		else {
+			//Mensaje Error
+		}
+	}
 }

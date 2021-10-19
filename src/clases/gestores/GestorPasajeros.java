@@ -51,6 +51,7 @@ public class GestorPasajeros {
 		for(Pasajero p : pasajeros) {
 			PasajeroDTO dto = new PasajeroDTO();
 			
+			dto.setId(p.getId());
 			dto.setApellido(p.getApellido());
 			dto.setNombre(p.getNombre());
 			dto.setIdTipoDoc(p.getTipo_doc().getId());
@@ -116,6 +117,17 @@ public class GestorPasajeros {
 		}
 		
 		return salida;
+	}
+	
+	public Boolean dniExistente(PasajeroDTO pasajero) {
+		
+		AdministradorBDPasajero adminBD = new AdministradorBDPasajero();
+        
+		return adminBD.dniExistente(pasajero.getNro_doc().get(), pasajero.getIdTipoDoc().get());
+	}
+	
+	public Boolean crearPasajero(PasajeroDTO pasajero) {
+		return true;
 	}
 	
 }

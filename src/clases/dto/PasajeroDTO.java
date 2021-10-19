@@ -6,6 +6,7 @@ import java.util.Optional;
 public class PasajeroDTO {
 
 	//Pasajero
+	private Optional<Integer> id = Optional.ofNullable(null);
 	private Optional<String> apellido = Optional.ofNullable(null);
 	private Optional<String> nombre = Optional.ofNullable(null);
 	private Optional<String> nro_doc = Optional.ofNullable(null);
@@ -49,6 +50,10 @@ public class PasajeroDTO {
 		super();
 	}
 
+	public Optional<Integer> getId(){
+		return id;
+	}
+	
 	public Optional<String> getApellido() {
 		return apellido;
 	}
@@ -151,6 +156,10 @@ public class PasajeroDTO {
 
 	public Optional<Double> getPorcentaje() {
 		return porcentaje;
+	}
+	
+	public void setId(Integer id) {
+		this.id = Optional.of(id);
 	}
 
 	public void setApellido(String apellido) {

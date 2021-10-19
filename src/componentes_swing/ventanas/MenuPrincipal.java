@@ -1,5 +1,6 @@
 package componentes_swing.ventanas;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -50,6 +51,7 @@ public class MenuPrincipal extends JPanel{
 		
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		setLayout(new GridBagLayout());
+		
 		setBackground(UIManager.getColor("CheckBox.focus"));
 		
 		enDesarrollo = new ActionListener() {
@@ -80,7 +82,7 @@ public class MenuPrincipal extends JPanel{
 				
 				App.getVentana().setEnabled(false);
 				ventanaAux.pack();
-				ventanaAux.setLocationRelativeTo(null);
+				ventanaAux.setLocationRelativeTo(App.getVentana());
 				ventanaAux.setVisible(true);
 				
 				aceptar.addActionListener(new ActionListener() {
@@ -126,8 +128,8 @@ public class MenuPrincipal extends JPanel{
 		cons.weightx = 0.1;
 		cons.weighty = 0.1;
 		cons.fill = GridBagConstraints.NONE;
-		cons.anchor = GridBagConstraints.EAST;
-		cons.insets = new Insets(20,20,20,60);
+		cons.anchor = GridBagConstraints.CENTER;
+		cons.insets = new Insets(20,20,20,20);
 		add(panelBotones,cons);
 		
 		gestionarPasajeros = new BotonJ("    Gestionar Pasajeros    ");
@@ -145,7 +147,7 @@ public class MenuPrincipal extends JPanel{
 		cons.fill = GridBagConstraints.HORIZONTAL;
 		cons.anchor = GridBagConstraints.CENTER;
 		
-		cons.weighty = 0;
+		cons.weighty = 0.1;
 		cons.gridwidth = 1;
 		cons.gridx = 1;
 		cons.gridy = 1;
@@ -214,14 +216,14 @@ public class MenuPrincipal extends JPanel{
 		
 		GridBagConstraints cons = new GridBagConstraints();
 		
-		cons.gridx = 1;
+		cons.gridx = 0;
 		cons.gridy = 0;
 		cons.gridwidth = 1;
 		cons.gridheight = 1;
-		cons.weightx = 0;
+		cons.weightx = 0.01;
 		cons.weighty = 0;
 		cons.fill = GridBagConstraints.NONE;
-		cons.anchor = GridBagConstraints.SOUTH;
+		cons.anchor = GridBagConstraints.SOUTHEAST;
 		cons.insets = new Insets(20,20,20,20);
 		add(panelUsuario,cons);
 		

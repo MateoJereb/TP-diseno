@@ -50,6 +50,14 @@ public class App {
 		ventana.repaint();
 	}
 	
+	public static void gestionarPasajeros(String apellido, String nombre, TipoDocumentoDTO tipoDoc, String nroDoc) {
+		GestionarPasajeros panel = new GestionarPasajeros(apellido,nombre,tipoDoc,nroDoc);
+		ventana.setContentPane(panel);
+		ventana.setTitle("Hotel Premier - Gestionar Pasajeros");
+		ventana.revalidate();
+		ventana.repaint();
+	}
+	
 	public static void darAltaPasajero(String apellido, String nombre, TipoDocumentoDTO tipoDoc, String nroDoc) {
 		DarAltaPasajero panel = new DarAltaPasajero(apellido,nombre,tipoDoc,nroDoc);
 		ventana.setContentPane(panel);

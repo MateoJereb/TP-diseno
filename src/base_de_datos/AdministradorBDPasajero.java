@@ -27,7 +27,7 @@ public class AdministradorBDPasajero extends AdministradorBD {
 		PreparedStatement sentencia = null;
 		ResultSet resultado = null;
 		
-		String consulta = "SELECT pj.apellido, pj.nombre, pj.id_tipo_documento, td.tipo, pj.nro_doc"
+		String consulta = "SELECT pj.id_pasajero, pj.apellido, pj.nombre, pj.id_tipo_documento, td.tipo, pj.nro_doc"
 						+ " FROM tp_12c.pasajero pj, tp_12c.tipo_documento td"
 						+ " WHERE pj.id_tipo_documento = td.id_tipo_documento";
 					
@@ -52,12 +52,13 @@ public class AdministradorBDPasajero extends AdministradorBD {
 				Pasajero pasajero = new Pasajero();
 				TipoDocumento tipoDoc = new TipoDocumento();
 				
-				pasajero.setApellido(resultado.getString(1));
-				pasajero.setNombre(resultado.getString(2));
-				pasajero.setNro_doc(resultado.getString(5));
+				pasajero.setId(resultado.getInt(1));
+				pasajero.setApellido(resultado.getString(2));
+				pasajero.setNombre(resultado.getString(3));
+				pasajero.setNro_doc(resultado.getString(6));
 				
-				tipoDoc.setId(resultado.getInt(3));
-				tipoDoc.setTipo(resultado.getString(4));
+				tipoDoc.setId(resultado.getInt(4));
+				tipoDoc.setTipo(resultado.getString(5));
 				
 				pasajero.setTipo_doc(tipoDoc);
 				
@@ -150,4 +151,38 @@ public class AdministradorBDPasajero extends AdministradorBD {
 		
 		return salida;
 	}
+	
+	public Boolean dniExistente(String dni, Integer idTipoDoc){
+        Boolean salida = false;
+		
+		Connection conexion = getConnection();
+        PreparedStatement sentencia = null;
+        ResultSet resultado = null;
+
+        String consulta = "SELECT pj.apellido"
+                        + " FROM tp_12c.pasajero pj , tp_12c.tipo_documento td"
+                        + " WHERE pj.id_tipo_documento = td.id_tipo_documento";
+
+
+        consulta += " AND pj.nro_doc =  '"+dni+"' AND td.id_tipo_documento = " + idTipoDoc;
+        consulta+=" ORDER BY 1";
+
+        try {
+            sentencia = conexion.prepareStatement(consulta);
+            resultado = sentencia.executeQuery();
+            
+            if(resultado.next())salida = true;
+           
+        }
+        catch(SQLException e) {
+			e.printStackTrace();
+		}
+        finally {
+            if(resultado!=null) try { resultado.close();} catch(SQLException e) {e.printStackTrace();}
+            if(sentencia!=null) try { sentencia.close();} catch(SQLException e) {e.printStackTrace();}
+            if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
+        }
+        
+        return salida;
+    }
 }

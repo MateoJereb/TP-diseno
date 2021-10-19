@@ -66,6 +66,42 @@ public class GestionarPasajeros extends JPanel {
 		cancelar.setNextFocusableComponent(cApellido);
 	}
 	
+	public GestionarPasajeros(String apellidoCargado, String nombreCargado, TipoDocumentoDTO tipoDocCargado, String nroDocCargado) {
+		setBorder(new EmptyBorder(10, 10, 10, 10));
+		setLayout(new GridBagLayout());
+		setBackground(UIManager.getColor("CheckBox.focus"));
+		
+		panelBusqueda();
+		panelResultados();
+		panelBotones();
+		
+		buscar.setNextFocusableComponent(siguiente);
+		cancelar.setNextFocusableComponent(cApellido);
+		
+		//Cargar los valores en los campos
+		cApellido.setText(apellidoCargado);
+		cNombre.setText(nombreCargado);
+		lTipoDoc.setSelectedItem(tipoDocCargado);
+		cNroDoc.setText(nroDocCargado);
+		
+		//Actualiza la tabla segun los valores cargados
+		PasajeroDTO datos = new PasajeroDTO();
+		datos.setApellido(cApellido.getText());
+		datos.setNombre(cNombre.getText());
+		
+		if(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getId() != -1) {
+			datos.setIdTipoDoc(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getId());
+		}
+		
+		if(cNroDoc.getText().length() > 0) {
+			datos.setNro_doc(cNroDoc.getText());
+		}
+		
+		GestorPasajeros gestor = GestorPasajeros.getInstance();
+		List<PasajeroDTO> resultado = gestor.buscarPasajeros(datos);
+		actualizarTabla(resultado);
+	}
+	
 	private void panelBusqueda() {
 		TitledBorder borde  = BorderFactory.createTitledBorder("Buscar pasajeros");
 		borde.setTitleFont(new Font("Microsoft Tai Le",Font.PLAIN,14));
@@ -170,7 +206,7 @@ public class GestionarPasajeros extends JPanel {
 					MensajeInformativo noHayResultados = new MensajeInformativo(App.getVentana(),"<html><body>No se encontraron resultados que coincidan con los<br>criterios de búsqueda.</body></html>","Dar alta de pasajero","Nueva búsqueda");
 					App.getVentana().setEnabled(false);
 					noHayResultados.pack();
-					noHayResultados.setLocationRelativeTo(null);
+					noHayResultados.setLocationRelativeTo(App.getVentana());
 					noHayResultados.setVisible(true); 
 					
 					noHayResultados.addWindowListener(new WindowAdapter() {
@@ -186,9 +222,7 @@ public class GestionarPasajeros extends JPanel {
 							noHayResultados.dispose();
 							App.getVentana().setEnabled(true);
 							App.getVentana().setVisible(true);
-							TipoDocumentoDTO tipo = (TipoDocumentoDTO)lTipoDoc.getSelectedItem();
-							if(tipo.getId() == -1) tipo = new TipoDocumentoDTO(1,"DNI"); //Si no selecciono ninguno, precarga DNI por ser el valor predeterminado
-							App.darAltaPasajero(cApellido.getText(), cNombre.getText(), tipo, cNroDoc.getText());
+							App.darAltaPasajero(cApellido.getText(), cNombre.getText(), (TipoDocumentoDTO)lTipoDoc.getSelectedItem(), cNroDoc.getText());
 						}					
 					};
 					
@@ -237,6 +271,9 @@ public class GestionarPasajeros extends JPanel {
 		tabla.getColumnModel().getColumn(1).setPreferredWidth(200);
 		tabla.getColumnModel().getColumn(2).setPreferredWidth(20);
 		tabla.getColumnModel().getColumn(3).setPreferredWidth(75);
+		tabla.getColumnModel().getColumn(4).setMaxWidth(0);
+		tabla.getColumnModel().getColumn(4).setMinWidth(0);
+		tabla.getColumnModel().getColumn(4).setPreferredWidth(0);
 		
 		actualizarTabla(new ArrayList<PasajeroDTO>());
 		
@@ -276,11 +313,8 @@ public class GestionarPasajeros extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				Integer fila = tabla.getSelectedRow();
 				
-				if(fila == -1) {					
-					TipoDocumentoDTO tipo = (TipoDocumentoDTO)lTipoDoc.getSelectedItem();
-					if(tipo.getId() == -1) tipo = new TipoDocumentoDTO(1,"DNI"); //Si no selecciono ninguno, precarga DNI por ser el valor predeterminado
-						
-					App.darAltaPasajero(cApellido.getText(), cNombre.getText(), tipo, cNroDoc.getText());
+				if(fila == -1) {						
+					App.darAltaPasajero(cApellido.getText(), cNombre.getText(), (TipoDocumentoDTO)lTipoDoc.getSelectedItem(), cNroDoc.getText());
 				}
 				else {
 					//Modificar
@@ -295,7 +329,7 @@ public class GestionarPasajeros extends JPanel {
 				MensajeConfirmacion ventanaAux = new MensajeConfirmacion(App.getVentana(),textoMensaje,"Sí","No");
 				App.getVentana().setEnabled(false);
 				ventanaAux.pack();
-				ventanaAux.setLocationRelativeTo(null);
+				ventanaAux.setLocationRelativeTo(App.getVentana());
 				ventanaAux.setVisible(true); 
 				
 				ventanaAux.addWindowListener(new WindowAdapter() {
@@ -339,6 +373,7 @@ public class GestionarPasajeros extends JPanel {
 			fila.add(p.getNombre().get());
 			fila.add(p.getTipo().get());
 			fila.add(p.getNro_doc().get());
+			fila.add(p.getId().get());
 			
 			data.add(fila);
 		}

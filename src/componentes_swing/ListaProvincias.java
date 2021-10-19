@@ -3,6 +3,8 @@ package componentes_swing;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.List;
 
 import javax.swing.JComboBox;
@@ -25,6 +27,13 @@ public class ListaProvincias extends JComboBox<ProvinciaDTO> {
 		setProvincias(1); //Por defecto las provincias de Argentina
 		
 		setRenderer(new MyCellRenderer(this));
+		
+		addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				setBackground(Color.WHITE);
+			}
+		});
 	}
 	
 	public void setProvincias(Integer idPais) {

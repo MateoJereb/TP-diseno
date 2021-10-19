@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 public class Pasajero {
 
+	private Integer id;
 	private String apellido;
 	private String nombre;
 	private String nro_doc;
@@ -22,7 +23,7 @@ public class Pasajero {
 		super();
 	}
 	
-	public Pasajero(String apellido, String nombre, String nro_doc, String cuit, LocalDate fecha_nacimiento,
+	public Pasajero(Integer id, String apellido, String nombre, String nro_doc, String cuit, LocalDate fecha_nacimiento,
 			String telefono, String mail, String ocupacion, String nacionalidad, Direccion direccion,
 			TipoDocumento tipo_doc, PosicionIVA posicion_iva) {
 		this.apellido = apellido;
@@ -37,6 +38,9 @@ public class Pasajero {
 		this.direccion = direccion;
 		this.tipo_doc = tipo_doc;
 		this.posicion_iva = posicion_iva;
+	}
+	public Integer getId() {
+		return id;
 	}
 	public String getApellido() {
 		return apellido;
@@ -75,6 +79,10 @@ public class Pasajero {
 		return posicion_iva;
 	}
 
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	
 	public void setApellido(String apellido) {
 		this.apellido = apellido;
 	}
@@ -99,6 +107,7 @@ public class Pasajero {
 		result = prime * result + ((cuit == null) ? 0 : cuit.hashCode());
 		result = prime * result + ((direccion == null) ? 0 : direccion.hashCode());
 		result = prime * result + ((fecha_nacimiento == null) ? 0 : fecha_nacimiento.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((mail == null) ? 0 : mail.hashCode());
 		result = prime * result + ((nacionalidad == null) ? 0 : nacionalidad.hashCode());
 		result = prime * result + ((nombre == null) ? 0 : nombre.hashCode());
@@ -138,6 +147,11 @@ public class Pasajero {
 			if (other.fecha_nacimiento != null)
 				return false;
 		} else if (!fecha_nacimiento.equals(other.fecha_nacimiento))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
 			return false;
 		if (mail == null) {
 			if (other.mail != null)
@@ -181,8 +195,5 @@ public class Pasajero {
 			return false;
 		return true;
 	}
-	
-	
-	
 	
 }
