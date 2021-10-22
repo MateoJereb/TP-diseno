@@ -20,6 +20,7 @@ import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.TableRowSorter;
 
 import clase_app.App;
 import clases.dto.PasajeroDTO;
@@ -276,6 +277,9 @@ public class GestionarPasajeros extends JPanel {
 		tabla.getColumnModel().getColumn(4).setPreferredWidth(0);
 		
 		actualizarTabla(new ArrayList<PasajeroDTO>());
+		
+		TableRowSorter<ModeloTablaPasajeros> sorter = new TableRowSorter<ModeloTablaPasajeros>(modelo);
+		tabla.setRowSorter(sorter);
 		
 		cons.gridy = 0;
 		panelResultados.add(scroll,cons);

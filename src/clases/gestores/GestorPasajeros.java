@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import base_de_datos.AdministradorBDPasajero;
+import base_de_datos.AdministradorBDUbicaciones;
 import clases.*;
 import clases.dto.PasajeroDTO;
 import clases.dto.PosicionIVADTO;
@@ -127,6 +128,25 @@ public class GestorPasajeros {
 	}
 	
 	public Boolean crearPasajero(PasajeroDTO pasajero) {
+		AdministradorBDUbicaciones adminBDUbicaciones = new AdministradorBDUbicaciones();
+		Localidad localidad = adminBDUbicaciones.localidadPorId(pasajero.getIdLocalidad().get());
+		
+		AdministradorBDPasajero adminBDPasajeros = new AdministradorBDPasajero();
+		PosicionIVA posIva = adminBDPasajeros.posicionIvaPorId(pasajero.getIdPosIva().get());
+		TipoDocumento tipoDoc = adminBDPasajeros.tipoDocumentoPorId(pasajero.getIdTipoDoc().get());
+		Direccion direc = new Direccion(pasajero);
+		
+		Pasajero pasaj = new Pasajero(pasajero);
+		pasaj.setDireccion(direc);
+		direc.setPasajero(pasaj);
+		direc.setLocalidad(localidad);
+		pasaj.setTipo_doc(tipoDoc);
+		pasaj.setPosicion_iva(posIva);
+		
+		Integer id = adminBDPasajeros.registrarPasajero(pasaj);
+		
+		if(id == -1) return false;
+		
 		return true;
 	}
 	

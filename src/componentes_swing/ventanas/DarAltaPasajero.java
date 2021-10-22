@@ -957,7 +957,7 @@ public class DarAltaPasajero extends JPanel {
 		Boolean creado = gestor.crearPasajero(pasajero);
 		
 		if(creado) {
-			MensajeInformativo pasajeroCreado = new MensajeInformativo(App.getVentana(),"El pasajero "+cNombre.getText()+" "+cApellido.getText()+"<html><body><br>ha sido satisfactoriamente cargado en el sistema.<br>¿Desea cargar otro?</body><html>","Sí","No");
+			MensajeInformativo pasajeroCreado = new MensajeInformativo(App.getVentana(),"<html><body>El pasajero "+cNombre.getText()+" "+cApellido.getText()+"<br>ha sido satisfactoriamente cargado en el sistema.<br>¿Desea cargar otro?</body><html>","Sí","No");
 			App.getVentana().setEnabled(false);
 			pasajeroCreado.pack();
 			pasajeroCreado.setLocationRelativeTo(App.getVentana());
@@ -994,7 +994,30 @@ public class DarAltaPasajero extends JPanel {
 			pasajeroCreado.setListeners(listenerSi, listenerNo);
 		}
 		else {
-			//Mensaje Error
+			MensajeError pasajeroNoCreado = new MensajeError(App.getVentana(),"<html><body>El pasajero no se pudo crear con éxito.<br>Intente nuevamente.</body></html>","Aceptar","");
+			pasajeroNoCreado.getContentPane().remove(3);
+			App.getVentana().setEnabled(false);
+			pasajeroNoCreado.pack();
+			pasajeroNoCreado.setLocationRelativeTo(App.getVentana());
+			pasajeroNoCreado.setVisible(true);
+			
+			pasajeroNoCreado.addWindowListener(new WindowAdapter() {
+				public void windowClosing(WindowEvent e) {
+					App.getVentana().setEnabled(true);
+					App.getVentana().setVisible(true);
+				}
+			});
+			
+			ActionListener listener = new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					pasajeroNoCreado.dispose();
+					App.getVentana().setEnabled(true);
+					App.getVentana().setVisible(true);
+				}
+			};
+			
+			pasajeroNoCreado.setListeners(listener,null);
 		}
 	}
 }

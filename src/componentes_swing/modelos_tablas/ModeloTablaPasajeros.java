@@ -20,8 +20,17 @@ public class ModeloTablaPasajeros extends AbstractTableModel {
 	}
 
 	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		return data.get(rowIndex).get(columnIndex);
+	public Object getValueAt(int rowIndex, int columnIndex){
+		Object salida = null;
+		
+		try{
+			salida = data.get(rowIndex).get(columnIndex);
+		}
+		catch(ArrayIndexOutOfBoundsException e) {
+			salida = new Object();
+		}
+		
+		return salida;
 	}
 	
 	public String getColumnName(int c) {

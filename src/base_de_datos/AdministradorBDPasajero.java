@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,6 +112,37 @@ public class AdministradorBDPasajero extends AdministradorBD {
 		return salida;
 	}
 	
+	public TipoDocumento tipoDocumentoPorId(Integer id) {
+		TipoDocumento tipoDoc = null;
+		
+		Connection conexion = getConnection();
+		PreparedStatement sentencia = null;
+		ResultSet resultado = null;
+		
+		try {
+			sentencia = conexion.prepareStatement("SELECT tipo FROM tp_12c.tipo_documento WHERE id_tipo_documento = "+id);
+			resultado = sentencia.executeQuery();
+			
+			while(resultado.next()) {
+				String tipo = resultado.getString(1);
+				
+				tipoDoc = new TipoDocumento(id,tipo);
+			}
+			
+			System.out.println("Consulta realizada: "+sentencia.toString());
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			if(resultado!=null) try { resultado.close();} catch(SQLException e) {e.printStackTrace();}
+			if(sentencia!=null) try { sentencia.close();} catch(SQLException e) {e.printStackTrace();}
+			if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
+		}
+		
+		return tipoDoc;
+	}
+	
 	public List<PosicionIVA> recuperarPosicionesIVA(){
 		List<PosicionIVA> salida = new ArrayList<PosicionIVA>();
 		
@@ -152,6 +185,47 @@ public class AdministradorBDPasajero extends AdministradorBD {
 		return salida;
 	}
 	
+	public PosicionIVA posicionIvaPorId(Integer id) {
+		PosicionIVA posIva = null;
+		
+		Connection conexion = getConnection();
+		PreparedStatement sentencia = null;
+		ResultSet resultado = null;
+		
+		try {
+			sentencia = conexion.prepareStatement("SELECT * FROM tp_12c.posicion_iva WHERE id_posicion_iva = "+id);
+			resultado = sentencia.executeQuery();
+			
+			while(resultado.next()) {
+				String posicion = resultado.getString(2);
+				Double porcentaje = resultado.getDouble(3);
+				TipoFactura tipoFactura = null;
+				if(resultado.getString(4) == "A") {
+					tipoFactura = TipoFactura.A;
+				}
+				else {
+					tipoFactura = TipoFactura.B;
+				}
+				
+				posIva = new PosicionIVA(id,posicion,porcentaje,tipoFactura);
+				
+			}
+			
+			System.out.println("Consulta realizada: "+sentencia.toString());
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			if(resultado!=null) try { resultado.close();} catch(SQLException e) {e.printStackTrace();}
+			if(sentencia!=null) try { sentencia.close();} catch(SQLException e) {e.printStackTrace();}
+			if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
+		}
+		
+		return posIva;
+		
+	}
+	
 	public Boolean dniExistente(String dni, Integer idTipoDoc){
         Boolean salida = false;
 		
@@ -173,6 +247,7 @@ public class AdministradorBDPasajero extends AdministradorBD {
             
             if(resultado.next())salida = true;
            
+            System.out.println("Consulta realizada: "+consulta);
         }
         catch(SQLException e) {
 			e.printStackTrace();
@@ -185,4 +260,77 @@ public class AdministradorBDPasajero extends AdministradorBD {
         
         return salida;
     }
+
+	public Integer registrarPasajero(Pasajero pasajero) {
+		Integer id = null;
+		
+		Connection conexion = getConnection();
+        Statement sentencia = null;
+        ResultSet resultado = null;
+        
+        try {
+            String consulta = "SELECT nextval('tp_12c.sec_pasajero')";
+        	sentencia = conexion.createStatement();
+            resultado = sentencia.executeQuery(consulta);
+            
+            while(resultado.next()) {
+            	id = resultado.getInt(1);
+            }
+            
+            System.out.println("Consulta realizada: "+consulta);
+            
+            conexion.setAutoCommit(false);
+            
+            //Pasajero
+            String nroDoc = "'"+pasajero.getNro_doc()+"'";
+            Integer idTipoDoc = pasajero.getTipo_doc().getId();
+            Integer idPosIva = pasajero.getPosicion_iva().getId();
+            String nombre = "'"+pasajero.getNombre()+"'";
+            String apellido = "'"+pasajero.getApellido()+"'";
+            String fechaNac = "'"+pasajero.getFecha_nacimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))+"'";
+            String telefono = "'"+pasajero.getTelefono()+"'";
+            String cuit = "null";
+            if(pasajero.getCuit() != null) cuit = "'"+pasajero.getCuit()+"'";
+            String mail = "null";
+            if(pasajero.getMail() != null) mail = "'"+pasajero.getMail()+"'";
+            String ocupacion = "'"+pasajero.getOcupacion()+"'";
+            String nacionalidad = "'"+pasajero.getNacionalidad()+"'";
+            
+            String insercionPasajero = "INSERT INTO tp_12c.pasajero VALUES "
+            		+ "("+id+","+nroDoc+","+idTipoDoc+","+idPosIva+","+nombre+","+apellido+","+fechaNac+","+telefono+","+cuit+","+mail+","+ocupacion+","+nacionalidad+")";
+            
+            sentencia.executeUpdate(insercionPasajero);
+            
+            //Direccion
+            Integer idLocalidad = pasajero.getDireccion().getLocalidad().getId(); 
+            String calle = "'"+pasajero.getDireccion().getCalle()+"'";
+            String numero = "'"+pasajero.getDireccion().getNumero()+"'";
+            String piso = "null";
+            if(pasajero.getDireccion().getPiso() != null) piso = pasajero.getDireccion().getPiso().toString();
+            String departamento = "null";
+            if(pasajero.getDireccion().getDepartamento() != null) departamento = "'"+pasajero.getDireccion().getDepartamento()+"'";
+            
+            String insercionDireccion = "INSERT INTO tp_12c.direccion VALUES "
+            		+ "(nextval('tp_12c.sec_direccion'),"+id+",null,"+idLocalidad+","+calle+","+numero+","+piso+","+departamento+")";
+            
+            sentencia.executeUpdate(insercionDireccion);
+            
+            conexion.commit();
+            
+            System.out.println("Inserción realizada: "+insercionPasajero);
+            System.out.println("Inserción realizada: "+insercionDireccion);
+            
+        }
+        catch(SQLException e) {
+			e.printStackTrace();
+			id = -1;
+		}
+        finally {
+            if(resultado!=null) try { resultado.close();} catch(SQLException e) {e.printStackTrace();}
+            if(sentencia!=null) try { sentencia.close();} catch(SQLException e) {e.printStackTrace();}
+            if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
+        }
+		
+		return id;
+	}
 }

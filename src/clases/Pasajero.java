@@ -2,6 +2,8 @@ package clases;
 
 import java.time.LocalDate;
 
+import clases.dto.PasajeroDTO;
+
 public class Pasajero {
 
 	private Integer id;
@@ -21,6 +23,18 @@ public class Pasajero {
 	
 	public Pasajero() {
 		super();
+	}
+	
+	public Pasajero(PasajeroDTO dto) {
+		apellido = dto.getApellido().get();
+		nombre = dto.getNombre().get();
+		nro_doc = dto.getNro_doc().get();
+		if(dto.getCuit().isPresent()) cuit = dto.getCuit().get();
+		fecha_nacimiento = dto.getFecha_nacimiento().get();
+		telefono = dto.getTelefono().get();
+		if(dto.getMail().isPresent()) dto.getMail().get();
+		ocupacion = dto.getOcupacion().get();
+		nacionalidad = dto.getNacionalidad().get();
 	}
 	
 	public Pasajero(Integer id, String apellido, String nombre, String nro_doc, String cuit, LocalDate fecha_nacimiento,
@@ -98,6 +112,21 @@ public class Pasajero {
 	public void setTipo_doc(TipoDocumento tipo_doc) {
 		this.tipo_doc = tipo_doc;
 	}
+	
+	public void setOcupacion(String ocupacion) {
+		this.ocupacion = ocupacion;
+	}
+	
+
+	public void setDireccion(Direccion direccion) {
+		this.direccion = direccion;
+	}
+	
+
+	public void setPosicion_iva(PosicionIVA posicion_iva) {
+		this.posicion_iva = posicion_iva;
+	}
+	
 
 	@Override
 	public int hashCode() {

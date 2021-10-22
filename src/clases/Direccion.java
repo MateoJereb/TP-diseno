@@ -2,19 +2,21 @@ package clases;
 
 import java.util.Optional;
 
+import clases.dto.PasajeroDTO;
+
 public class Direccion {
 
 	private Integer idDireccion;
 	private String calle;
 	private String numero;
-	private String departamento;
 	private Integer piso;
+	private String departamento;
 	
 	private Optional<Pasajero> pasajero;
 	private Localidad localidad;
 	
 		
-	public Direccion(Integer idDireccion, String calle, String numero, String departamento, Integer piso, Pasajero pasajero,
+	public Direccion(Integer idDireccion, String calle, String numero, Integer piso, String departamento, Pasajero pasajero,
 			Localidad localidad) {
 		this.idDireccion = idDireccion;
 		this.calle = calle;
@@ -23,6 +25,13 @@ public class Direccion {
 		this.piso = piso;
 		this.pasajero = Optional.of(pasajero);
 		this.localidad = localidad;
+	}
+	
+	public Direccion(PasajeroDTO dto) {
+		calle = dto.getCalle().get();
+		numero = dto.getNumero().get();
+		if(dto.getNumero().isPresent()) numero = dto.getNumero().get();
+		if(dto.getDepartamento().isPresent()) departamento = dto.getDepartamento().get();
 	}
 
 	public Integer getId() {
@@ -51,6 +60,14 @@ public class Direccion {
 	
 	public Localidad getLocalidad() {
 		return localidad;
+	}
+	
+	public void setPasajero(Pasajero pasajero) {
+		this.pasajero = Optional.of(pasajero);
+	}
+	
+	public void setLocalidad(Localidad localidad) {
+		this.localidad = localidad;
 	}
 
 	@Override
