@@ -14,8 +14,7 @@ public class App {
 	
 	public static void main(String[] args) {
 		
-		//menuPrincipal();
-		gestionarPasajeros();
+		menuPrincipal();
 		ImageIcon icono = new ImageIcon("resources\\logo.png");
 		Image imagen = icono.getImage();
 		ventana.setIconImage(imagen);
