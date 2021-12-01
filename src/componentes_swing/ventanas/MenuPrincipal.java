@@ -197,10 +197,16 @@ public class MenuPrincipal extends JPanel{
 				App.gestionarPasajeros();
 			}
 		});
+		
+		ocuparHabitacion.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				App.ocuparHabitacion();
+			}
+		});
 	
 		reservarHabitacion.addActionListener(enDesarrollo);
 		cancelarReserva.addActionListener(enDesarrollo);		
-		ocuparHabitacion.addActionListener(enDesarrollo);	
 		generarFactura.addActionListener(enDesarrollo);	
 		ingresarPago.addActionListener(enDesarrollo);		
 		ingresarNotaCredito.addActionListener(enDesarrollo);		

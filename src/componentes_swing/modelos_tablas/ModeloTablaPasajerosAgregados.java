@@ -4,10 +4,14 @@ import java.util.Vector;
 
 import javax.swing.table.AbstractTableModel;
 
-public class ModeloTablaPasajeros extends AbstractTableModel {
-
-	String[] columnNames = {"Apellido","Nombre","Tipo doc.","Nro. doc.",""};
+public class ModeloTablaPasajerosAgregados extends AbstractTableModel {
+	String[] columnNames = {"Apellido","Nombre","Tipo doc.","Nro. doc.","","Resp.",""};
 	Vector<Vector<Object>> data;
+	
+	public ModeloTablaPasajerosAgregados() {
+		super();
+		data = new Vector<Vector<Object>>();
+	}
 	
 	@Override
 	public int getRowCount() {
@@ -45,7 +49,18 @@ public class ModeloTablaPasajeros extends AbstractTableModel {
 		this.data = data;
 	}
 	
+	public void addRow(Vector<Object> row) {
+		data.add(row);
+	}
+	
+	public void removeRow(int i) {
+		data.removeElementAt(i);
+	}
+	
 	public boolean isCellEditable(int row, int col) {
+		if(col == 5) {
+			return true;
+		}
 		return false;
 	}
 
@@ -53,5 +68,4 @@ public class ModeloTablaPasajeros extends AbstractTableModel {
         data.get(row).set(col, value);
         fireTableCellUpdated(row, col);
  }
-	
 }

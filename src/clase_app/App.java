@@ -1,6 +1,8 @@
 package clase_app;
 
 import java.awt.Image;
+import java.time.LocalDate;
+
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -14,7 +16,12 @@ public class App {
 	
 	public static void main(String[] args) {
 		
-		menuPrincipal();
+		//menuPrincipal();
+		
+		HabitacionDTO hab = new HabitacionFamilyDTO();
+		hab.setNro(5);
+		cargarPasajeros(hab,null,null);
+		
 		ImageIcon icono = new ImageIcon("resources\\logo.png");
 		Image imagen = icono.getImage();
 		ventana.setIconImage(imagen);
@@ -61,6 +68,22 @@ public class App {
 		DarAltaPasajero panel = new DarAltaPasajero(apellido,nombre,tipoDoc,nroDoc);
 		ventana.setContentPane(panel);
 		ventana.setTitle("Hotel Premier - Dar de Alta Pasajero");
+		ventana.revalidate();
+		ventana.repaint();
+	}
+	
+	public static void ocuparHabitacion() {
+		OcuparHabitacion panel = new OcuparHabitacion();
+		ventana.setContentPane(panel);
+		ventana.setTitle("Hotel Premier - Reservar Habitación");
+		ventana.revalidate();
+		ventana.repaint();
+	}
+	
+	public static void cargarPasajeros(HabitacionDTO habitacion, LocalDate fechaDesde, LocalDate fechaHasta) {
+		CargarPasajeros panel = new CargarPasajeros(habitacion,fechaDesde,fechaHasta);
+		ventana.setContentPane(panel);
+		ventana.setTitle("Hotel Premier - Cargar Pasajeros");
 		ventana.revalidate();
 		ventana.repaint();
 	}

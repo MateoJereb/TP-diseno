@@ -4,10 +4,23 @@ import java.util.Vector;
 
 import javax.swing.table.AbstractTableModel;
 
-public class ModeloTablaPasajeros extends AbstractTableModel {
-
-	String[] columnNames = {"Apellido","Nombre","Tipo doc.","Nro. doc.",""};
+public class ModeloTablaHabitaciones extends AbstractTableModel{
+	Vector<String> columnNames = new Vector<String>();
 	Vector<Vector<Object>> data;
+	
+	public ModeloTablaHabitaciones() {
+		super();
+		columnNames.add("Fecha");
+		data = new Vector<Vector<Object>>();
+	}
+	
+	public void addColumn(String c) {
+		columnNames.add(c);
+	}
+	
+	public void addAllColumn(Vector<String> columns) {
+		columnNames.addAll(columns);
+	}
 	
 	@Override
 	public int getRowCount() {
@@ -16,7 +29,7 @@ public class ModeloTablaPasajeros extends AbstractTableModel {
 
 	@Override
 	public int getColumnCount() {
-		return columnNames.length;
+		return columnNames.size();
 	}
 
 	@Override
@@ -34,7 +47,7 @@ public class ModeloTablaPasajeros extends AbstractTableModel {
 	}
 	
 	public String getColumnName(int c) {
-		return columnNames[c];
+		return columnNames.get(c);
 	}
 	
 	public Class getColumnClass(int c) {
@@ -53,5 +66,4 @@ public class ModeloTablaPasajeros extends AbstractTableModel {
         data.get(row).set(col, value);
         fireTableCellUpdated(row, col);
  }
-	
 }
