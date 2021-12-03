@@ -13,6 +13,7 @@ public class Direccion {
 	private String departamento;
 	
 	private Optional<Pasajero> pasajero;
+	private Optional<ResponsablePago> responsable_pago;
 	private Localidad localidad;
 	
 		

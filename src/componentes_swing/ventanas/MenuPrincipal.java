@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Optional;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -201,7 +202,7 @@ public class MenuPrincipal extends JPanel{
 		ocuparHabitacion.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				App.ocuparHabitacion();
+				App.ocuparHabitacion(Optional.ofNullable(null));
 			}
 		});
 	

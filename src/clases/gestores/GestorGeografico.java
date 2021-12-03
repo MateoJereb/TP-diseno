@@ -25,7 +25,7 @@ public class GestorGeografico {
 		return instancia;
 	}
 	
-	public GestorGeografico() {
+	private GestorGeografico() {
 		listaLocalidades = new ArrayList<Localidad>();
 		listaProvincias = new ArrayList<Provincia>();
 		listaPaises = new ArrayList<Pais>();

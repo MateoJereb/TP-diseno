@@ -1,6 +1,7 @@
 package clases;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import clases.dto.PasajeroDTO;
 
@@ -20,6 +21,9 @@ public class Pasajero {
 	private Direccion direccion;
 	private TipoDocumento tipo_doc;
 	private PosicionIVA posicion_iva;
+	private List<Factura> facturas;
+	private List<Estadia> estadias;
+	private List<Estadia> responsable_de;
 	
 	public Pasajero() {
 		super();

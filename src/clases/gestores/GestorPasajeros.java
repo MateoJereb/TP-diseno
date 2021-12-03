@@ -27,7 +27,7 @@ public class GestorPasajeros {
 		return instancia;
 	}
 	
-	public GestorPasajeros() {
+	private GestorPasajeros() {
 		listaPasajeros = new ArrayList<Pasajero>();
 		listaDirecciones = new ArrayList<Direccion>();
 		listaPosicionesIVA = new ArrayList<PosicionIVA>();

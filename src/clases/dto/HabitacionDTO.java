@@ -1,75 +1,75 @@
 package clases.dto;
 
+import java.util.Optional;
+
 import enums.EstadoHabitacion;
 
 public class HabitacionDTO {
-	private Integer nro;
-	private Integer planta;
-	private Integer capacidad;
-	private Double costo_noche;
-	private EstadoHabitacion estado_actual;
-	private Double descuento;
-	private Integer diasParaDescuento;
-	
-	public HabitacionDTO() {
-		super();
-	}
+	private Optional<Integer> nro;
+	private Optional<Integer> planta;
+	private Optional<Integer> capacidad;
+	private Optional<Double> costo_noche;
+	private Optional<EstadoHabitacion> estado_actual;
+	private Optional<Double> descuento;
+	private Optional<Integer> diasParaDescuento;
 
-	public Integer getNro() {
+	public Optional<Integer> getNro() {
 		return nro;
 	}
 
 	public void setNro(Integer nro) {
-		this.nro = nro;
+		this.nro = Optional.of(nro);
 	}
 
-	public Integer getPlanta() {
+	public Optional<Integer> getPlanta() {
 		return planta;
 	}
 
 	public void setPlanta(Integer planta) {
-		this.planta = planta;
+		this.planta = Optional.of(planta);
 	}
 
-	public Integer getCapacidad() {
+	public Optional<Integer> getCapacidad() {
 		return capacidad;
 	}
 
 	public void setCapacidad(Integer capacidad) {
-		this.capacidad = capacidad;
+		this.capacidad = Optional.of(capacidad);
 	}
 
-	public Double getCosto_noche() {
+	public Optional<Double> getCosto_noche() {
 		return costo_noche;
 	}
 
 	public void setCosto_noche(Double costo_noche) {
-		this.costo_noche = costo_noche;
+		this.costo_noche = Optional.of(costo_noche);
 	}
 
-	public EstadoHabitacion getEstado_actual() {
+	public Optional<EstadoHabitacion> getEstado_actual() {
 		return estado_actual;
 	}
 
 	public void setEstado_actual(EstadoHabitacion estado_actual) {
-		this.estado_actual = estado_actual;
+		this.estado_actual = Optional.of(estado_actual);
 	}
 
-	public Double getDescuento() {
+	public Optional<Double> getDescuento() {
 		return descuento;
 	}
 
 	public void setDescuento(Double descuento) {
-		this.descuento = descuento;
+		this.descuento = Optional.of(descuento);
 	}
 
-	public Integer getDiasParaDescuento() {
+	public Optional<Integer> getDiasParaDescuento() {
 		return diasParaDescuento;
 	}
 
 	public void setDiasParaDescuento(Integer diasParaDescuento) {
-		this.diasParaDescuento = diasParaDescuento;
+		this.diasParaDescuento = Optional.of(diasParaDescuento);
 	}
+
+	
 	
 	
 	

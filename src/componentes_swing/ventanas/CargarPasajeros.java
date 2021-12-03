@@ -14,10 +14,13 @@ import java.awt.event.WindowEvent;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
@@ -69,6 +72,7 @@ public class CargarPasajeros extends JPanel{
 	private JPanel panelAgregados;
 	private ModeloTablaPasajerosAgregados modeloAgregados;
 	private TablaJ tablaAgregados;
+	private List<PasajeroDTO> pasajerosAgregados = new ArrayList<PasajeroDTO>();
 	private JPanel panelBotones;
 	private BotonJ siguiente;
 	private BotonJ cancelar;
@@ -76,7 +80,11 @@ public class CargarPasajeros extends JPanel{
 	
 	private BotonJ menuPrincipal;
 	
-	public CargarPasajeros(HabitacionDTO habitacion,LocalDate fechaDesde,LocalDate fechaHasta) {
+	//Cargar otra habitacion
+	private JDialog ventanaCargarOtraHabitacion;
+	private CargarOtraHabitacion panelCargarOtraHabitacion;
+	
+	public CargarPasajeros(HabitacionDTO habitacion, LocalDate fechaDesde, LocalDate fechaHasta, Optional<PasajeroDTO> responsable) {
 		super();			
 		
 		setBorder(new EmptyBorder(10, 20, 10, 20));
@@ -111,7 +119,9 @@ public class CargarPasajeros extends JPanel{
 		panelBusqueda();
 		panelResultados();
 		panelAgregados();
-		listeners();
+		listeners(responsable);
+		
+		if(responsable.isPresent()) inicializarResponsable(responsable);
 	}
 	
 	private void panelInformacion(HabitacionDTO habitacion) {
@@ -306,7 +316,6 @@ public class CargarPasajeros extends JPanel{
 		
 		tablaAgregados.setRowSelectionAllowed(false);
 		tablaAgregados.setColumnSelectionAllowed(false);
-		//tablaAgregados.setCellSelectionEnabled(true);
 		
 		cons.gridx = 0;
 		cons.gridy = 0;
@@ -357,7 +366,7 @@ public class CargarPasajeros extends JPanel{
 		
 	}
 	
-	private void listeners() {
+	private void listeners(Optional<PasajeroDTO> responsable) {
 		buscar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -438,7 +447,7 @@ public class CargarPasajeros extends JPanel{
 						ventanaAux.dispose();
 						App.getVentana().setEnabled(true);
 						App.getVentana().setVisible(true);
-						App.ocuparHabitacion();
+						App.ocuparHabitacion(responsable);
 					}
 				 };
 				 
@@ -499,21 +508,23 @@ public class CargarPasajeros extends JPanel{
 			@Override
 			 public void mouseClicked(MouseEvent evt) {
 				Integer fila = tablaResultados.getSelectedRow();
+				Integer id = (Integer) modeloResultados.getValueAt(fila, 4);
 				String apellido = (String) modeloResultados.getValueAt(fila, 0);
 				String nombre = (String) modeloResultados.getValueAt(fila, 1);
 				String tipoDoc = (String) modeloResultados.getValueAt(fila, 2);
 				String nroDoc = (String) modeloResultados.getValueAt(fila, 3);
-				Integer id = (Integer) modeloResultados.getValueAt(fila, 4);
 				
-				PasajeroDTO pasajero = new PasajeroDTO();
-				pasajero.setApellido(apellido);
-				pasajero.setNombre(nombre);
-				pasajero.setTipo(tipoDoc);
-				pasajero.setNro_doc(nroDoc);
-				pasajero.setId(id);
+				PasajeroDTO pasajeroDTO = new PasajeroDTO();
+				pasajeroDTO.setApellido(apellido);
+				pasajeroDTO.setNombre(nombre);
+				pasajeroDTO.setTipo(tipoDoc);
+				pasajeroDTO.setNro_doc(nroDoc);
+				pasajeroDTO.setId(id);
 				
-				actualizarTablaAgregados(pasajero);
-				
+				if(!pasajerosAgregados.contains(pasajeroDTO)) {
+					pasajerosAgregados.add(pasajeroDTO);
+					actualizarTablaAgregados(pasajeroDTO);
+				}
 			}
 		});
 		
@@ -524,6 +535,10 @@ public class CargarPasajeros extends JPanel{
 				int columna = tablaAgregados.getSelectedColumn();
 				
 				if(columna == 6) {
+					PasajeroDTO dtoAux = new PasajeroDTO();
+					dtoAux.setId((Integer)modeloAgregados.getValueAt(fila, 4));
+					pasajerosAgregados.remove(dtoAux);
+					
 					modeloAgregados.removeRow(fila);
 					modeloAgregados.fireTableDataChanged();
 				}
@@ -603,7 +618,74 @@ public class CargarPasajeros extends JPanel{
 		fila.add(iconoBasura);
 		
 		modeloAgregados.addRow(fila);
-		modeloAgregados.fireTableDataChanged();
-		
+		modeloAgregados.fireTableDataChanged();	
 	}
+	
+	private void cargarOtraHabitacion() {
+		ventanaCargarOtraHabitacion = new JDialog(App.getVentana(),"Hotel Premier - Cargar otra habitación");
+		panelCargarOtraHabitacion = new CargarOtraHabitacion();
+		ventanaCargarOtraHabitacion.setContentPane(panelCargarOtraHabitacion);
+		
+		App.getVentana().setEnabled(false);
+		ventanaCargarOtraHabitacion.pack();
+		ventanaCargarOtraHabitacion.setLocationRelativeTo(App.getVentana());
+		ventanaCargarOtraHabitacion.setVisible(true);
+		
+		ventanaCargarOtraHabitacion.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+			}
+		});
+		
+		panelCargarOtraHabitacion.getSeguirCargando().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ventanaCargarOtraHabitacion.dispose();
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+			}
+		});
+		
+		panelCargarOtraHabitacion.getCargarOtraHabitacion().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				//TODO actualizar informacion
+				ventanaCargarOtraHabitacion.dispose();
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+				
+				//TODO -> instancias PasajeroDTO responsable y pasarlo como parametro
+				
+			}
+		});
+		
+		panelCargarOtraHabitacion.getSalir().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				//TODO actualizar informacion
+				ventanaCargarOtraHabitacion.dispose();
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+				App.menuPrincipal();
+			}
+		});
+	}
+
+	private void inicializarResponsable(Optional<PasajeroDTO> p) {
+		Vector<Object> fila = new Vector<Object>();
+		
+		fila.add(p.get().getApellido().get());
+		fila.add(p.get().getNombre().get());
+		fila.add(p.get().getTipo().get());
+		fila.add(p.get().getNro_doc().get());
+		fila.add(p.get().getId().get());
+		fila.add(true);
+		fila.add(iconoBasura);
+		
+		pasajerosAgregados.add(p.get());
+		modeloAgregados.addRow(fila);
+		modeloAgregados.fireTableDataChanged();	
+	}
+
 }

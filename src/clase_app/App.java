@@ -2,6 +2,7 @@ package clase_app;
 
 import java.awt.Image;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -18,9 +19,17 @@ public class App {
 		
 		//menuPrincipal();
 		
-		HabitacionDTO hab = new HabitacionFamilyDTO();
+		ocuparHabitacion(Optional.ofNullable(null));
+		
+		/*HabitacionDTO hab = new HabitacionFamilyDTO();
 		hab.setNro(5);
-		cargarPasajeros(hab,null,null);
+		PasajeroDTO p = new PasajeroDTO();
+		p.setId(1);
+		p.setApellido("Jereb");
+		p.setNombre("Mateo");
+		p.setTipo("DNI");
+		p.setNro_doc("43287075");
+		cargarPasajeros(hab,null,null,Optional.of(p));*/
 		
 		ImageIcon icono = new ImageIcon("resources\\logo.png");
 		Image imagen = icono.getImage();
@@ -72,16 +81,16 @@ public class App {
 		ventana.repaint();
 	}
 	
-	public static void ocuparHabitacion() {
-		OcuparHabitacion panel = new OcuparHabitacion();
+	public static void ocuparHabitacion(Optional<PasajeroDTO> responsable) {
+		OcuparHabitacion panel = new OcuparHabitacion(responsable);
 		ventana.setContentPane(panel);
 		ventana.setTitle("Hotel Premier - Reservar Habitación");
 		ventana.revalidate();
 		ventana.repaint();
 	}
 	
-	public static void cargarPasajeros(HabitacionDTO habitacion, LocalDate fechaDesde, LocalDate fechaHasta) {
-		CargarPasajeros panel = new CargarPasajeros(habitacion,fechaDesde,fechaHasta);
+	public static void cargarPasajeros(HabitacionDTO habitacion, LocalDate fechaDesde, LocalDate fechaHasta, Optional<PasajeroDTO> responsable) {
+		CargarPasajeros panel = new CargarPasajeros(habitacion,fechaDesde,fechaHasta,responsable);
 		ventana.setContentPane(panel);
 		ventana.setTitle("Hotel Premier - Cargar Pasajeros");
 		ventana.revalidate();
