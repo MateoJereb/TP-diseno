@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import base_de_datos.AdministradorBDHabitaciones;
 import base_de_datos.AdministradorBDReservas;
@@ -97,7 +98,21 @@ public class GestorReservas {
 	}
 	
 	private Boolean fechaReservada(Habitacion hab, LocalDate fecha, List<Reserva> reservas) {
-		return false;
+		List<Reserva> reservasHabitacionEnFecha = reservas.stream()
+				.filter(r -> r.getHabitacion().getNro().equals(hab.getNro()))
+				.filter(r -> entreFechas(fecha,r.getEntrada(),r.getSalida()))
+				.collect(Collectors.toList());
+		
+		if(reservasHabitacionEnFecha.isEmpty()) return false;
+		
+		return true;
+	}
+	
+	private Boolean entreFechas(LocalDate fecha, LocalDate comienzoRango, LocalDate finalRango) {
+		
+		if(fecha.isBefore(comienzoRango) || fecha.isAfter(finalRango)) return false;
+		
+		return true;
 	}
 	
 	private HabitacionDTO generarDTOHabitacion(Habitacion h) {

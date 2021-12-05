@@ -47,8 +47,8 @@ public class AdministradorBDEstadias extends AdministradorBD {
 			while(resultado.next()) {
 				//Estadia
 				Integer id = resultado.getInt(1);
-				LocalDateTime hora_entrada = LocalDateTime.parse(resultado.getString(4),DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-				LocalDateTime hora_salida = LocalDateTime.parse(resultado.getString(5),DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));;
+				LocalDateTime hora_entrada = LocalDateTime.parse(resultado.getString(4),DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+				LocalDateTime hora_salida = LocalDateTime.parse(resultado.getString(5),DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));;
 				Double monto = resultado.getDouble(6);
 				Boolean pagado = resultado.getBoolean(7);
 				

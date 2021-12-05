@@ -6,4 +6,9 @@ public class HabitacionIndividualDTO extends HabitacionDTO {
 		super();
 	}
 	
+	@Override
+	public String toString() {
+		return "Habitación Individual Estándar (Nro. "+nro.get()+")";
+	}
+	
 }

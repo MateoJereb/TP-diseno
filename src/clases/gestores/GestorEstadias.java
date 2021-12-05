@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import base_de_datos.AdministradorBDEstadias;
 import clases.Estadia;
@@ -50,6 +51,20 @@ public class GestorEstadias {
 	}
 	
 	private Boolean fechaOcupada(HabitacionDTO hab, LocalDate fecha, List<Estadia> estadias) {
-		return false;
+		List<Estadia> estadiasHabitacionEnFecha = estadias.stream()
+				.filter(e -> e.getHabitacion().getNro().equals(hab.getNro().get()))
+				.filter(e -> entreFechas(fecha,e.getHora_entrada().toLocalDate(),e.getHora_salida().toLocalDate()))
+				.collect(Collectors.toList());
+		
+		if(estadiasHabitacionEnFecha.isEmpty()) return false;
+		
+		return true;
+	}
+	
+	private Boolean entreFechas(LocalDate fecha, LocalDate comienzoRango, LocalDate finalRango) {
+		
+		if(fecha.isBefore(comienzoRango) || fecha.isAfter(finalRango)) return false;
+		
+		return true;
 	}
 }

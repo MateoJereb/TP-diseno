@@ -202,7 +202,7 @@ public class MenuPrincipal extends JPanel{
 		ocuparHabitacion.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				App.ocuparHabitacion(Optional.ofNullable(null));
+				App.ocuparHabitacion(Optional.ofNullable(null),Optional.ofNullable(null),Optional.ofNullable(null));
 			}
 		});
 	

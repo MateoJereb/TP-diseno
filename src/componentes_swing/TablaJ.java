@@ -18,7 +18,13 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+import clases.HabitacionFamily;
 import clases.dto.HabitacionDTO;
+import clases.dto.HabitacionDobleEstandarDTO;
+import clases.dto.HabitacionDobleSuperiorDTO;
+import clases.dto.HabitacionFamilyDTO;
+import clases.dto.HabitacionIndividualDTO;
+import clases.dto.HabitacionSuiteDTO;
 import enums.EstadoHabitacion;
 
 public class TablaJ extends JTable{
@@ -40,6 +46,7 @@ public class TablaJ extends JTable{
 		setRowSelectionAllowed(true);
 		setColumnSelectionAllowed(false);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		getTableHeader().setReorderingAllowed(false);
 		
 	}
 	
@@ -54,72 +61,91 @@ public class TablaJ extends JTable{
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
 			
-			if(value.getClass() == HabitacionDTO.class) {
+			if(esHabitacionDTO(value)) {
 				HabitacionDTO hab = (HabitacionDTO) value;
 				
-				if(hab.getEstado_actual().get() == EstadoHabitacion.FUERA_DE_SERVICIO) {
-					setText("FUERA DE SERVICIO");
+				if(hab.getAOcupar()) {
+					setText("A OCUPAR");
 					setFont(new Font("Microsoft Tai Le",Font.BOLD,12));
+					setBackground(new Color(255,200,200));
 					setForeground(Color.BLACK);
-					setBackground(Color.LIGHT_GRAY);
 					setHorizontalAlignment(EtiquetaJ.CENTER);
-					
-					if(hasFocus) {
-						setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-						setBackground(new Color(200,215,225));
-					}
-					else {
-						setBorder(null);
-					}
 				}
-				if(hab.getEstado_actual().get() == EstadoHabitacion.DISPONIBLE) {
-					setText("DISPONIBLE");
-					setFont(new Font("Microsoft Tai Le",Font.BOLD,12));
-					setForeground(new Color(0,150,0));
-					setBackground(Color.WHITE);
-					setHorizontalAlignment(EtiquetaJ.CENTER);
-					
-					if(hasFocus) {
-						setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-						setBackground(new Color(200,215,225));
+				else {
+					if(hab.getEstado_actual().get() == EstadoHabitacion.FUERA_DE_SERVICIO) {
+						setText("FUERA DE SERVICIO");
+						setFont(new Font("Microsoft Tai Le",Font.BOLD,12));
+						setForeground(Color.BLACK);
+						setBackground(Color.LIGHT_GRAY);
+						setHorizontalAlignment(EtiquetaJ.CENTER);
+						
+						if(hasFocus) {
+							setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+							setBackground(new Color(200,215,225));
+						}
+						else {
+							setBorder(null);
+						}
 					}
-					else {
-						setBorder(null);
+					if(hab.getEstado_actual().get() == EstadoHabitacion.DISPONIBLE) {
+						setText("DISPONIBLE");
+						setFont(new Font("Microsoft Tai Le",Font.BOLD,12));
+						setForeground(new Color(0,150,0));
+						setBackground(Color.WHITE);
+						setHorizontalAlignment(EtiquetaJ.CENTER);
+						
+						if(hasFocus) {
+							setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+							setBackground(new Color(200,215,225));
+						}
+						else {
+							setBorder(null);
+						}
 					}
-				}
-				if(hab.getEstado_actual().get() == EstadoHabitacion.RESERVADA) {
-					setText("RESERVADA");
-					setFont(new Font("Microsoft Tai Le",Font.BOLD,12));
-					setForeground(new Color(255,200,0));
-					setBackground(Color.WHITE);
-					setHorizontalAlignment(EtiquetaJ.CENTER);
-					
-					if(hasFocus) {
-						setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-						setBackground(new Color(200,215,225));
+					if(hab.getEstado_actual().get() == EstadoHabitacion.RESERVADA) {
+						setText("RESERVADA");
+						setFont(new Font("Microsoft Tai Le",Font.BOLD,12));
+						setForeground(new Color(255,200,0));
+						setBackground(Color.WHITE);
+						setHorizontalAlignment(EtiquetaJ.CENTER);
+						
+						if(hasFocus) {
+							setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+							setBackground(new Color(200,215,225));
+						}
+						else {
+							setBorder(null);
+						}
 					}
-					else {
-						setBorder(null);
-					}
-				}
-				if(hab.getEstado_actual().get() == EstadoHabitacion.OCUPADA) {
-					setText("OCUPADA");
-					setFont(new Font("Microsoft Tai Le",Font.BOLD,12));
-					setForeground(new Color(200,0,0));
-					setBackground(Color.WHITE);
-					setHorizontalAlignment(EtiquetaJ.CENTER);
-					
-					if(hasFocus) {
-						setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-						setBackground(new Color(200,215,225));
-					}
-					else {
-						setBorder(null);
+					if(hab.getEstado_actual().get() == EstadoHabitacion.OCUPADA) {
+						setText("OCUPADA");
+						setFont(new Font("Microsoft Tai Le",Font.BOLD,12));
+						setForeground(new Color(200,0,0));
+						setBackground(Color.WHITE);
+						setHorizontalAlignment(EtiquetaJ.CENTER);
+						
+						if(hasFocus) {
+							setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+							setBackground(new Color(200,215,225));
+						}
+						else {
+							setBorder(null);
+						}
 					}
 				}
 			}
 			
 			return this;
+		}
+		
+		private Boolean esHabitacionDTO(Object o) {
+			if(o.getClass() == HabitacionIndividualDTO.class) return true;
+			if(o.getClass() == HabitacionDobleEstandarDTO.class) return true;
+			if(o.getClass() == HabitacionDobleSuperiorDTO.class) return true;
+			if(o.getClass() == HabitacionFamilyDTO.class) return true;
+			if(o.getClass() == HabitacionSuiteDTO.class) return true;
+			
+			return false;
 		}
 		
 	}

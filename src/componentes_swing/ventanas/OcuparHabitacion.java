@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -120,24 +121,51 @@ public class OcuparHabitacion extends JPanel{
 	private BotonJ cancelarSuperiorFamilyPlan;
 	private BotonJ cancelarSuiteDoble;
 	
+	//Fechas para reservar
+	private HabitacionDTO habitacionSeleccionada;
+	private LocalDate fechaInicial;
+	private LocalDate fechaFinal;
+	private Integer xInicial;
+	private Integer yInicial;
+	private Integer xFinal;
+	private Integer yFinal;
+	
 	//Fechas reservadas
 	private JDialog ventanaFechasReservadas;
 	private FechasReservadas panelFechasReservadas;
 	
-	public OcuparHabitacion(Optional<PasajeroDTO> responsable) {
+	public OcuparHabitacion(Optional<PasajeroDTO> responsable, Optional<LocalDate> desdeAnterior, Optional<LocalDate> hastaAnterior) {
 		super();			
 		
 		setBorder(new EmptyBorder(10, 20, 10, 20));
 		setLayout(new GridBagLayout());
 		setBackground(UIManager.getColor("CheckBox.focus"));
 		
-		panelBusqueda();
+		panelBusqueda(desdeAnterior, hastaAnterior);
 		panelHabitaciones();
 		panelBotones();
-		listeners(responsable);		
+		listeners(responsable);
+		
+		if(desdeAnterior.isPresent() && hastaAnterior.isPresent()) {
+			Integer anioD = desdeAnterior.get().getYear();
+			Integer mesD = desdeAnterior.get().getMonthValue();
+			Integer diaD = desdeAnterior.get().getDayOfMonth();
+			modelDesde.setDate(anioD,mesD,diaD);
+			modelDesde.setSelected(true);
+			
+			Integer anioH = hastaAnterior.get().getYear();
+			Integer mesH = hastaAnterior.get().getMonthValue();
+			Integer diaH = hastaAnterior.get().getDayOfMonth();
+			modelHasta.setDate(anioH,mesH,diaH);
+			modelHasta.setSelected(true);
+			
+			GestorReservas gestor = GestorReservas.getInstance();
+			Map<HabitacionDTO,Map<LocalDate,EstadoHabitacion>> disponibilidades = gestor.verificarDisponibilidad(desdeAnterior.get(), hastaAnterior.get());
+			actualizarTablas(disponibilidades);
+		}
 	}
 	
-	private void panelBusqueda() {
+	private void panelBusqueda(Optional<LocalDate> desdeAnterior, Optional<LocalDate> hastaAnterior) {
 		GridBagConstraints cons = new GridBagConstraints();
 		TitledBorder borde  = BorderFactory.createTitledBorder("Buscar Habitación");
 		borde.setTitleFont(new Font("Microsoft Tai Le",Font.PLAIN,14));
@@ -166,7 +194,7 @@ public class OcuparHabitacion extends JPanel{
 		fechasInvalidas = new EtiquetaJ("Bien");
 		fechasInvalidas.setForeground(Color.WHITE);
 		
-		configurarDatePickers();
+		configurarDatePickers(desdeAnterior,hastaAnterior);
 		
 		cons.anchor = GridBagConstraints.CENTER;
 		cons.weighty = 0;
@@ -207,7 +235,7 @@ public class OcuparHabitacion extends JPanel{
 		panelBusqueda.add(fechasInvalidas,cons);		
 	}
 	
-	private void configurarDatePickers() {
+	private void configurarDatePickers(Optional<LocalDate> desdeAnterior, Optional<LocalDate> hastaAnterior) {
 		Properties p = new Properties();
 		p.put("text.day", "Día");
 		p.put("text.month", "Mes");
@@ -473,6 +501,9 @@ public class OcuparHabitacion extends JPanel{
 						GestorReservas gestor = GestorReservas.getInstance();
 						Map<HabitacionDTO,Map<LocalDate,EstadoHabitacion>> disponibilidades = gestor.verificarDisponibilidad(fechaDesde, fechaHasta);
 						actualizarTablas(disponibilidades);
+						habitacionSeleccionada = null;
+						fechaInicial = null;
+						fechaFinal = null;
 						
 					}
 					else {
@@ -549,7 +580,34 @@ public class OcuparHabitacion extends JPanel{
 		tablaIndividualEstandar.addMouseListener(new MouseAdapter() {
 			@Override
 			 public void mouseClicked(MouseEvent evt) {
+				Integer fila = tablaIndividualEstandar.getSelectedRow();
+				Integer columna = tablaIndividualEstandar.getSelectedColumn();
 				
+				if(columna != 0) { //No se selecciona la columna fechas
+					HabitacionIndividualDTO selec = (HabitacionIndividualDTO) modeloIndividualEstandar.getValueAt(fila, columna);
+					if(fechaInicial == null) { //No se selecciono ni fecha inicial ni final
+						if(accionSegunEstado(fila, columna)) {
+							habitacionSeleccionada = selec;
+							fechaInicial = (LocalDate) modeloIndividualEstandar.getValueAt(fila, 0);
+							xInicial = fila;
+							yInicial = columna;
+							marcarOcupar(fila,columna,modeloIndividualEstandar);
+						}
+					}
+					else {
+						if(fechaFinal == null) { //Se selecciono fecha inicial, pero no final
+							if(selec.getNro().get() == habitacionSeleccionada.getNro().get()) { //Se selecciona la misma habitacion
+								
+							}
+							else { //Se selecciona otra habitacion
+								errorHabitacionDistinta();
+							}
+						}
+						else { //Se selecciono fecha inicial y final
+							
+						}
+					}
+				}
 			}
 		});
 	}
@@ -620,6 +678,8 @@ public class OcuparHabitacion extends JPanel{
 			tablaSuiteDoble.getColumnModel().getColumn(i).setMaxWidth(130);
 			tablaSuiteDoble.getColumnModel().getColumn(i).setMinWidth(130);
 		}
+		
+		
 	}
 	
 	private Boolean fechasSeleccionadas() {
@@ -657,8 +717,7 @@ public class OcuparHabitacion extends JPanel{
 		return true;
 	}
 	
-	
-private void actualizarTablas(Map<HabitacionDTO,Map<LocalDate,EstadoHabitacion>> disponibilidades) {
+	private void actualizarTablas(Map<HabitacionDTO,Map<LocalDate,EstadoHabitacion>> disponibilidades) {
 		Vector<Vector<Object>> dataIndividualEstandar = new Vector<Vector<Object>>();
 		Vector<Vector<Object>> dataDobleEstandar = new Vector<Vector<Object>>();
 		Vector<Vector<Object>> dataDobleSuperior = new Vector<Vector<Object>>();
@@ -683,11 +742,10 @@ private void actualizarTablas(Map<HabitacionDTO,Map<LocalDate,EstadoHabitacion>>
 			fila.add(fecha);
 			
 			for(HabitacionDTO hab : habsIndividuales) {
-				HabitacionDTO celda = new HabitacionDTO();
-				Integer nro = hab.getNro().get();
-				EstadoHabitacion estado = disponibilidades.get(hab).get(fecha);
-				celda.setNro(nro);
-				celda.setEstado_actual(estado);
+				HabitacionDTO celda = new HabitacionIndividualDTO();
+				celda.setNro(hab.getNro().get());
+				celda.setCapacidad(hab.getCapacidad().get());
+				celda.setEstado_actual(disponibilidades.get(hab).get(fecha));
 				fila.add(celda);
 			}
 			dataIndividualEstandar.add(fila);
@@ -700,11 +758,10 @@ private void actualizarTablas(Map<HabitacionDTO,Map<LocalDate,EstadoHabitacion>>
 			fila.add(fecha);
 			
 			for(HabitacionDTO hab : habsDoblesEstandar) {
-				HabitacionDTO celda = new HabitacionDTO();
-				Integer nro = hab.getNro().get();
-				EstadoHabitacion estado = disponibilidades.get(hab).get(fecha);
-				celda.setNro(nro);
-				celda.setEstado_actual(estado);
+				HabitacionDTO celda = new HabitacionDobleEstandarDTO();
+				celda.setNro(hab.getNro().get());
+				celda.setCapacidad(hab.getCapacidad().get());
+				celda.setEstado_actual(disponibilidades.get(hab).get(fecha));
 				fila.add(celda);
 			}
 			
@@ -718,11 +775,10 @@ private void actualizarTablas(Map<HabitacionDTO,Map<LocalDate,EstadoHabitacion>>
 			fila.add(fecha);
 			
 			for(HabitacionDTO hab : habsDoblesSuperiores) {
-				HabitacionDTO celda = new HabitacionDTO();
-				Integer nro = hab.getNro().get();
-				EstadoHabitacion estado = disponibilidades.get(hab).get(fecha);
-				celda.setNro(nro);
-				celda.setEstado_actual(estado);
+				HabitacionDTO celda = new HabitacionDobleSuperiorDTO();
+				celda.setNro(hab.getNro().get());
+				celda.setCapacidad(hab.getCapacidad().get());
+				celda.setEstado_actual(disponibilidades.get(hab).get(fecha));
 				fila.add(celda);
 			}
 			
@@ -736,11 +792,10 @@ private void actualizarTablas(Map<HabitacionDTO,Map<LocalDate,EstadoHabitacion>>
 			fila.add(fecha);
 			
 			for(HabitacionDTO hab : habsFamilys) {
-				HabitacionDTO celda = new HabitacionDTO();
-				Integer nro = hab.getNro().get();
-				EstadoHabitacion estado = disponibilidades.get(hab).get(fecha);
-				celda.setNro(nro);
-				celda.setEstado_actual(estado);
+				HabitacionDTO celda = new HabitacionFamilyDTO();
+				celda.setNro(hab.getNro().get());
+				celda.setCapacidad(hab.getCapacidad().get());
+				celda.setEstado_actual(disponibilidades.get(hab).get(fecha));
 				fila.add(celda);
 			}
 			
@@ -754,11 +809,10 @@ private void actualizarTablas(Map<HabitacionDTO,Map<LocalDate,EstadoHabitacion>>
 			fila.add(fecha);
 			
 			for(HabitacionDTO hab : habsSuites) {
-				HabitacionDTO celda = new HabitacionDTO();
-				Integer nro = hab.getNro().get();
-				EstadoHabitacion estado = disponibilidades.get(hab).get(fecha);
-				celda.setNro(nro);
-				celda.setEstado_actual(estado);
+				HabitacionDTO celda = new HabitacionSuiteDTO();
+				celda.setNro(hab.getNro().get());
+				celda.setCapacidad(hab.getCapacidad().get());
+				celda.setEstado_actual(disponibilidades.get(hab).get(fecha));
 				fila.add(celda);
 			}
 			
@@ -816,5 +870,45 @@ private void actualizarTablas(Map<HabitacionDTO,Map<LocalDate,EstadoHabitacion>>
 			}
 		});
 	}
+	
+	private Boolean accionSegunEstado(Integer x, Integer y) { //Retorna true si se debe pintar como a ocupar y false si no
+		return true;
+	}
 
+	private void marcarOcupar(Integer x, Integer y, ModeloTablaHabitaciones modelo) {
+		HabitacionDTO h = (HabitacionDTO) modelo.getValueAt(x, y);
+		h.setAOcupar(true);
+		modelo.setValueAt(h, x, y);
+		modelo.fireTableDataChanged();
+	}
+	
+	private void errorHabitacionDistinta() {
+		String mensaje = "<html><body>Debe seleccionar la fecha final para la siguiente habitación:<br>"
+				+habitacionSeleccionada.toString()+"</body></html>";
+		MensajeError habitacionDistinta = new MensajeError(App.getVentana(),mensaje,"Aceptar","");
+		habitacionDistinta.getContentPane().remove(3);
+		
+		App.getVentana().setEnabled(false);
+		habitacionDistinta.pack();
+		habitacionDistinta.setLocationRelativeTo(App.getVentana());
+		habitacionDistinta.setVisible(true);
+		
+		habitacionDistinta.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+			}
+		});
+		
+		ActionListener listenerAceptar = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				habitacionDistinta.dispose();
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+			}
+		 };
+		 
+		 habitacionDistinta.setListeners(listenerAceptar, null);
+	}
 }

@@ -74,6 +74,7 @@ public class CargarPasajeros extends JPanel{
 	private TablaJ tablaAgregados;
 	private List<PasajeroDTO> pasajerosAgregados = new ArrayList<PasajeroDTO>();
 	private JPanel panelBotones;
+	private EtiquetaJ capacidadAlcanzada;
 	private BotonJ siguiente;
 	private BotonJ cancelar;
 	private ImageIcon iconoBasura;
@@ -119,7 +120,7 @@ public class CargarPasajeros extends JPanel{
 		panelBusqueda();
 		panelResultados();
 		panelAgregados();
-		listeners(responsable);
+		listeners(habitacion,responsable,fechaDesde,fechaHasta);
 		
 		if(responsable.isPresent()) inicializarResponsable(responsable);
 	}
@@ -146,7 +147,7 @@ public class CargarPasajeros extends JPanel{
 		cons.anchor = GridBagConstraints.NORTH;
 		panelSuperior.add(panelInformacion,cons);
 		
-		eInfo = new EtiquetaJ("<html><body>Se está ocupando la habitación:<br><br>&emsp\u2022Nro: "+habitacion.getNro()+"<br><br>&emsp\u2022Tipo: "+textoTipoHab(habitacion)+"<br><br></html></body>");
+		eInfo = new EtiquetaJ("<html><body>Se está ocupando la habitación:<br><br>&emsp\u2022Nro: "+habitacion.getNro().get()+"<br><br>&emsp\u2022Tipo: "+textoTipoHab(habitacion)+"<br><br></html></body>");
 		
 		cons.weighty = 0.1;
 		cons.weightx = 0.1;
@@ -253,7 +254,7 @@ public class CargarPasajeros extends JPanel{
 		cons.gridy = 0;
 		cons.gridwidth = 1;
 		cons.gridheight = 1;
-		cons.weightx = 0.12;
+		cons.weightx = 0.45;
 		cons.weighty = 0.1;
 		cons.fill = GridBagConstraints.BOTH;
 		cons.insets = new Insets(10,10,0,10);
@@ -336,6 +337,7 @@ public class CargarPasajeros extends JPanel{
 		cons.insets = new Insets(10,10,5,25);
 		panelInferior.add(menuPrincipal,cons);
 		
+		capacidadAlcanzada = new EtiquetaJ("Capacidad de la habitación alcanzada");
 		siguiente = new BotonJ("Siguiente");
 		cancelar = new BotonJ("Cancelar");
 		
@@ -345,7 +347,7 @@ public class CargarPasajeros extends JPanel{
 		cons.gridy = 1;
 		cons.gridwidth = 1;
 		cons.gridheight = 1;
-		cons.weightx = 0.01;
+		cons.weightx = 0;
 		cons.weighty = 0;
 		cons.fill = GridBagConstraints.NONE;
 		cons.insets = new Insets(0,20,0,10);
@@ -354,19 +356,25 @@ public class CargarPasajeros extends JPanel{
 		
 		cons.gridy = 1;
 		cons.weighty = 0.01;
+		cons.weightx = 0;
 		cons.gridwidth = 1;
 		cons.fill = GridBagConstraints.NONE;
-		cons.anchor = GridBagConstraints.SOUTHEAST;
+		cons.anchor = GridBagConstraints.EAST;
+		cons.insets = new Insets(0,10,10,0);
+		capacidadAlcanzada.setForeground(Color.WHITE);
+		panelBotones.add(capacidadAlcanzada,cons);
+		
+		cons.gridx = 1;
 		cons.insets = new Insets(0,10,10,0);
 		panelBotones.add(siguiente,cons);
 		
-		cons.gridx=1;
+		cons.gridx=2;
 		cons.insets = new Insets(0,10,10,0);
 		panelBotones.add(cancelar,cons);
 		
 	}
 	
-	private void listeners(Optional<PasajeroDTO> responsable) {
+	private void listeners(HabitacionDTO habitacion, Optional<PasajeroDTO> responsable,LocalDate fechaDesde, LocalDate fechaHasta) {
 		buscar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -447,7 +455,8 @@ public class CargarPasajeros extends JPanel{
 						ventanaAux.dispose();
 						App.getVentana().setEnabled(true);
 						App.getVentana().setVisible(true);
-						App.ocuparHabitacion(responsable);
+						App.ocuparHabitacion(responsable,Optional.of(fechaDesde),Optional.of(fechaHasta));
+						
 					}
 				 };
 				 
@@ -522,8 +531,13 @@ public class CargarPasajeros extends JPanel{
 				pasajeroDTO.setId(id);
 				
 				if(!pasajerosAgregados.contains(pasajeroDTO)) {
-					pasajerosAgregados.add(pasajeroDTO);
-					actualizarTablaAgregados(pasajeroDTO);
+					if(modeloAgregados.getRowCount() < habitacion.getCapacidad().get()) {
+						pasajerosAgregados.add(pasajeroDTO);
+						actualizarTablaAgregados(pasajeroDTO);
+					}
+					else {
+						capacidadAlcanzada.setForeground(Color.RED);
+					}
 				}
 			}
 		});
@@ -541,6 +555,7 @@ public class CargarPasajeros extends JPanel{
 					
 					modeloAgregados.removeRow(fila);
 					modeloAgregados.fireTableDataChanged();
+					capacidadAlcanzada.setForeground(Color.WHITE);
 				}
 			}
 		});
@@ -621,7 +636,7 @@ public class CargarPasajeros extends JPanel{
 		modeloAgregados.fireTableDataChanged();	
 	}
 	
-	private void cargarOtraHabitacion() {
+	private void cargarOtraHabitacion(LocalDate fechadesde, LocalDate fechaHasta) {
 		ventanaCargarOtraHabitacion = new JDialog(App.getVentana(),"Hotel Premier - Cargar otra habitación");
 		panelCargarOtraHabitacion = new CargarOtraHabitacion();
 		ventanaCargarOtraHabitacion.setContentPane(panelCargarOtraHabitacion);

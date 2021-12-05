@@ -4,14 +4,16 @@ import java.util.Optional;
 
 import enums.EstadoHabitacion;
 
-public class HabitacionDTO {
-	private Optional<Integer> nro;
-	private Optional<Integer> planta;
-	private Optional<Integer> capacidad;
-	private Optional<Double> costo_noche;
-	private Optional<EstadoHabitacion> estado_actual;
-	private Optional<Double> descuento;
-	private Optional<Integer> diasParaDescuento;
+public abstract class HabitacionDTO {
+	protected Optional<Integer> nro;
+	protected Optional<Integer> planta;
+	protected Optional<Integer> capacidad;
+	protected Optional<Double> costo_noche;
+	protected Optional<EstadoHabitacion> estado_actual;
+	protected Optional<Double> descuento;
+	protected Optional<Integer> diasParaDescuento;
+	
+	protected Boolean aOcupar = false;
 
 	public Optional<Integer> getNro() {
 		return nro;
@@ -69,9 +71,14 @@ public class HabitacionDTO {
 		this.diasParaDescuento = Optional.of(diasParaDescuento);
 	}
 
+	public Boolean getAOcupar() {
+		return aOcupar;
+	}
+
+	public void setAOcupar(Boolean aOcupar) {
+		this.aOcupar = aOcupar;
+	}
 	
-	
-	
-	
+	public abstract String toString();
 	
 }

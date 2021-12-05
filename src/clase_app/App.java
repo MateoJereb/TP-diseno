@@ -19,9 +19,10 @@ public class App {
 		
 		//menuPrincipal();
 		
-		ocuparHabitacion(Optional.ofNullable(null));
+		ocuparHabitacion(Optional.ofNullable(null),Optional.ofNullable(null),Optional.ofNullable(null));
 		
-		/*HabitacionDTO hab = new HabitacionFamilyDTO();
+		/*HabitacionDTO hab = new HabitacionDobleEstandarDTO();
+		hab.setCapacidad(2);
 		hab.setNro(5);
 		PasajeroDTO p = new PasajeroDTO();
 		p.setId(1);
@@ -29,7 +30,7 @@ public class App {
 		p.setNombre("Mateo");
 		p.setTipo("DNI");
 		p.setNro_doc("43287075");
-		cargarPasajeros(hab,null,null,Optional.of(p));*/
+		cargarPasajeros(hab,LocalDate.now(),LocalDate.now().plusDays(1),Optional.of(p));*/
 		
 		ImageIcon icono = new ImageIcon("resources\\logo.png");
 		Image imagen = icono.getImage();
@@ -43,10 +44,6 @@ public class App {
 	
 	public static JFrame getVentana() {
 		return ventana;
-	}
-	
-	public static void logueo() {
-		
 	}
 	
 	public static void menuPrincipal() {
@@ -81,8 +78,8 @@ public class App {
 		ventana.repaint();
 	}
 	
-	public static void ocuparHabitacion(Optional<PasajeroDTO> responsable) {
-		OcuparHabitacion panel = new OcuparHabitacion(responsable);
+	public static void ocuparHabitacion(Optional<PasajeroDTO> responsable, Optional<LocalDate> desdeAnterior, Optional<LocalDate> hastaAnterior) {
+		OcuparHabitacion panel = new OcuparHabitacion(responsable,desdeAnterior,hastaAnterior);
 		ventana.setContentPane(panel);
 		ventana.setTitle("Hotel Premier - Reservar Habitación");
 		ventana.revalidate();
