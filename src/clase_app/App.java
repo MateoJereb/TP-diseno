@@ -2,6 +2,7 @@ package clase_app;
 
 import java.awt.Image;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import javax.swing.ImageIcon;
@@ -19,9 +20,9 @@ public class App {
 		
 		//menuPrincipal();
 		
-		ocuparHabitacion(Optional.ofNullable(null),Optional.ofNullable(null),Optional.ofNullable(null));
-		
-		/*HabitacionDTO hab = new HabitacionDobleEstandarDTO();
+		LocalDate dic1 = LocalDate.parse("01-12-2021",DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		LocalDate dic31 = LocalDate.parse("31-12-2021",DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		HabitacionDTO hab = new HabitacionDobleEstandarDTO();
 		hab.setCapacidad(2);
 		hab.setNro(5);
 		PasajeroDTO p = new PasajeroDTO();
@@ -30,7 +31,10 @@ public class App {
 		p.setNombre("Mateo");
 		p.setTipo("DNI");
 		p.setNro_doc("43287075");
-		cargarPasajeros(hab,LocalDate.now(),LocalDate.now().plusDays(1),Optional.of(p));*/
+		
+		ocuparHabitacion(Optional.of(p),Optional.of(dic1),Optional.of(dic31));
+		
+		//cargarPasajeros(hab,LocalDate.now(),LocalDate.now().plusDays(1),Optional.of(p));
 		
 		ImageIcon icono = new ImageIcon("resources\\logo.png");
 		Image imagen = icono.getImage();

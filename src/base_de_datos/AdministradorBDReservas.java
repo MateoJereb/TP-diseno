@@ -114,5 +114,44 @@ public class AdministradorBDReservas extends AdministradorBD {
 		
 		return salida;
 	}
-	
+
+	public List<Reserva> recuperarReservasHabitacion(Integer nroHab){
+		List<Reserva> salida = new ArrayList<Reserva>();
+		
+		Connection conexion = getConnection();
+		PreparedStatement sentencia = null;
+		ResultSet resultado = null;
+		
+		try {
+			sentencia = conexion.prepareStatement("SELECT * FROM tp_12c.reserva "
+												+ "WHERE nro_habitacion = ? ");
+			
+			sentencia.setObject(1, nroHab);
+			
+			resultado = sentencia.executeQuery();
+			
+			while(resultado.next()) {
+				Integer id = resultado.getInt(1);
+				LocalDate diaEntrada = LocalDate.parse(resultado.getString(3),DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+				LocalDate diaSalida = LocalDate.parse(resultado.getString(4),DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+				String nombre = resultado.getString(5);
+				String apellido = resultado.getString(6);
+				String telefono = resultado.getString(7);
+				
+				Reserva res = new Reserva(id,diaEntrada,diaSalida,nombre,apellido,telefono);
+				salida.add(res);
+			}
+			System.out.println("Consulta realizada: "+sentencia.toString());
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			if(resultado!=null) try { resultado.close();} catch(SQLException e) {e.printStackTrace();}
+			if(sentencia!=null) try { sentencia.close();} catch(SQLException e) {e.printStackTrace();}
+			if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
+		}
+		
+		return salida;
+	}
 }

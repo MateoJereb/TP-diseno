@@ -79,13 +79,7 @@ public class TablaJ extends JTable{
 						setBackground(Color.LIGHT_GRAY);
 						setHorizontalAlignment(EtiquetaJ.CENTER);
 						
-						if(hasFocus) {
-							setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-							setBackground(new Color(200,215,225));
-						}
-						else {
-							setBorder(null);
-						}
+						if(hasFocus || isSelected) setBackground(UIManager.getColor("Table.selectionBackground"));
 					}
 					if(hab.getEstado_actual().get() == EstadoHabitacion.DISPONIBLE) {
 						setText("DISPONIBLE");
@@ -94,28 +88,17 @@ public class TablaJ extends JTable{
 						setBackground(Color.WHITE);
 						setHorizontalAlignment(EtiquetaJ.CENTER);
 						
-						if(hasFocus) {
-							setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-							setBackground(new Color(200,215,225));
-						}
-						else {
-							setBorder(null);
-						}
+						if(hasFocus || isSelected) setBackground(UIManager.getColor("Table.selectionBackground"));
+				
 					}
 					if(hab.getEstado_actual().get() == EstadoHabitacion.RESERVADA) {
 						setText("RESERVADA");
 						setFont(new Font("Microsoft Tai Le",Font.BOLD,12));
-						setForeground(new Color(255,200,0));
+						setForeground(new Color(255,165,0));
 						setBackground(Color.WHITE);
 						setHorizontalAlignment(EtiquetaJ.CENTER);
 						
-						if(hasFocus) {
-							setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-							setBackground(new Color(200,215,225));
-						}
-						else {
-							setBorder(null);
-						}
+						if(hasFocus || isSelected) setBackground(UIManager.getColor("Table.selectionBackground"));
 					}
 					if(hab.getEstado_actual().get() == EstadoHabitacion.OCUPADA) {
 						setText("OCUPADA");
@@ -124,13 +107,7 @@ public class TablaJ extends JTable{
 						setBackground(Color.WHITE);
 						setHorizontalAlignment(EtiquetaJ.CENTER);
 						
-						if(hasFocus) {
-							setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-							setBackground(new Color(200,215,225));
-						}
-						else {
-							setBorder(null);
-						}
+						if(hasFocus || isSelected) setBackground(UIManager.getColor("Table.selectionBackground"));
 					}
 				}
 			}

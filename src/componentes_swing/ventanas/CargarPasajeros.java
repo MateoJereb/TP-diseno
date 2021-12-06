@@ -147,7 +147,7 @@ public class CargarPasajeros extends JPanel{
 		cons.anchor = GridBagConstraints.NORTH;
 		panelSuperior.add(panelInformacion,cons);
 		
-		eInfo = new EtiquetaJ("<html><body>Se está ocupando la habitación:<br><br>&emsp\u2022Nro: "+habitacion.getNro().get()+"<br><br>&emsp\u2022Tipo: "+textoTipoHab(habitacion)+"<br><br></html></body>");
+		eInfo = new EtiquetaJ("<html><body>Se está ocupando la habitación:<br><br>\u2022Nro: "+habitacion.getNro().get()+"<br><br>\u2022Tipo: "+textoTipoHab(habitacion)+"<br><br></html></body>");
 		
 		cons.weighty = 0.1;
 		cons.weightx = 0.1;

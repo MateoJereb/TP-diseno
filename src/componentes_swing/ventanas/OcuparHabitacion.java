@@ -17,6 +17,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -44,6 +45,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
@@ -121,18 +124,17 @@ public class OcuparHabitacion extends JPanel{
 	private BotonJ cancelarSuperiorFamilyPlan;
 	private BotonJ cancelarSuiteDoble;
 	
-	//Fechas para reservar
-	private HabitacionDTO habitacionSeleccionada;
+	//Seleccion
+	private HabitacionDTO habSeleccionada;
+	private ModeloTablaHabitaciones modeloSeleccionado;
 	private LocalDate fechaInicial;
 	private LocalDate fechaFinal;
-	private Integer xInicial;
-	private Integer yInicial;
-	private Integer xFinal;
-	private Integer yFinal;
+	private Integer inicioRango;
+	private Integer finalRango;
+	private Integer columnaRango;
 	
-	//Fechas reservadas
-	private JDialog ventanaFechasReservadas;
-	private FechasReservadas panelFechasReservadas;
+	private Boolean seleccionHecha = false;
+	 
 	
 	public OcuparHabitacion(Optional<PasajeroDTO> responsable, Optional<LocalDate> desdeAnterior, Optional<LocalDate> hastaAnterior) {
 		super();			
@@ -500,11 +502,7 @@ public class OcuparHabitacion extends JPanel{
 						
 						GestorReservas gestor = GestorReservas.getInstance();
 						Map<HabitacionDTO,Map<LocalDate,EstadoHabitacion>> disponibilidades = gestor.verificarDisponibilidad(fechaDesde, fechaHasta);
-						actualizarTablas(disponibilidades);
-						habitacionSeleccionada = null;
-						fechaInicial = null;
-						fechaFinal = null;
-						
+						actualizarTablas(disponibilidades);						
 					}
 					else {
 						fechasInvalidas.setText("La fecha 'desde' no puede ser posterior a la fecha 'hasta'");
@@ -521,7 +519,37 @@ public class OcuparHabitacion extends JPanel{
 		ActionListener listenerOcupar = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//TODO listener ocupar
+				if(seleccionHecha) {
+					App.cargarPasajeros(habSeleccionada, fechaInicial, fechaFinal, responsable);
+				}
+				else {
+					String mensaje = "<html><body>Debe seleccionar un rango de fechas<br>válido para la habitación a ocupar.</body></html>";
+					MensajeError noSelecciono = new MensajeError(App.getVentana(),mensaje,"Aceptar","");
+					noSelecciono.getContentPane().remove(3);
+					
+					App.getVentana().setEnabled(false);
+					noSelecciono.pack();
+					noSelecciono.setLocationRelativeTo(App.getVentana());
+					noSelecciono.setVisible(true);
+					
+					noSelecciono.addWindowListener(new WindowAdapter() {
+						public void windowClosing(WindowEvent e) {
+							App.getVentana().setEnabled(true);
+							App.getVentana().setVisible(true);
+						}
+					});
+					
+					ActionListener listenerAceptar = new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							noSelecciono.dispose();
+							App.getVentana().setEnabled(true);
+							App.getVentana().setVisible(true);
+						}
+					 };
+					 
+					 noSelecciono.setListeners(listenerAceptar, null);
+				}
 			}
 		};
 		
@@ -579,35 +607,36 @@ public class OcuparHabitacion extends JPanel{
 		
 		tablaIndividualEstandar.addMouseListener(new MouseAdapter() {
 			@Override
-			 public void mouseClicked(MouseEvent evt) {
-				Integer fila = tablaIndividualEstandar.getSelectedRow();
-				Integer columna = tablaIndividualEstandar.getSelectedColumn();
-				
-				if(columna != 0) { //No se selecciona la columna fechas
-					HabitacionIndividualDTO selec = (HabitacionIndividualDTO) modeloIndividualEstandar.getValueAt(fila, columna);
-					if(fechaInicial == null) { //No se selecciono ni fecha inicial ni final
-						if(accionSegunEstado(fila, columna)) {
-							habitacionSeleccionada = selec;
-							fechaInicial = (LocalDate) modeloIndividualEstandar.getValueAt(fila, 0);
-							xInicial = fila;
-							yInicial = columna;
-							marcarOcupar(fila,columna,modeloIndividualEstandar);
-						}
-					}
-					else {
-						if(fechaFinal == null) { //Se selecciono fecha inicial, pero no final
-							if(selec.getNro().get() == habitacionSeleccionada.getNro().get()) { //Se selecciona la misma habitacion
-								
-							}
-							else { //Se selecciona otra habitacion
-								errorHabitacionDistinta();
-							}
-						}
-						else { //Se selecciono fecha inicial y final
-							
-						}
-					}
-				}
+			 public void mouseReleased(MouseEvent evt) {
+				accionSegunEstado(modeloIndividualEstandar,tablaIndividualEstandar);
+			}
+		});
+		
+		tablaDobleEstandar.addMouseListener(new MouseAdapter() {
+			@Override
+			 public void mouseReleased(MouseEvent evt) {
+				accionSegunEstado(modeloDobleEstandar,tablaDobleEstandar);
+			}
+		});
+		
+		tablaDobleSuperior.addMouseListener(new MouseAdapter() {
+			@Override
+			 public void mouseReleased(MouseEvent evt) {
+				accionSegunEstado(modeloDobleSuperior,tablaDobleSuperior);
+			}
+		});
+		
+		tablaSuperiorFamilyPlan.addMouseListener(new MouseAdapter() {
+			@Override
+			 public void mouseReleased(MouseEvent evt) {
+				accionSegunEstado(modeloSuperiorFamilyPlan,tablaSuperiorFamilyPlan);
+			}
+		});
+		
+		tablaSuiteDoble.addMouseListener(new MouseAdapter() {
+			@Override
+			 public void mouseReleased(MouseEvent evt) {
+				accionSegunEstado(modeloSuiteDoble,tablaSuiteDoble);
 			}
 		});
 	}
@@ -630,19 +659,11 @@ public class OcuparHabitacion extends JPanel{
 			}
 		}
 		
-		tablaIndividualEstandar.setRowSelectionAllowed(false);
-		tablaDobleEstandar.setRowSelectionAllowed(false);
-		tablaDobleSuperior.setRowSelectionAllowed(false);
-		tablaSuperiorFamilyPlan.setRowSelectionAllowed(false);
-		tablaSuiteDoble.setRowSelectionAllowed(false);
-		
 		modeloIndividualEstandar.fireTableStructureChanged();
 		modeloDobleEstandar.fireTableStructureChanged();
 		modeloDobleSuperior.fireTableStructureChanged();
 		modeloSuperiorFamilyPlan.fireTableStructureChanged();
 		modeloSuiteDoble.fireTableStructureChanged();
-		
-		tablaIndividualEstandar.setFocusable(false);
 		
 		tablaIndividualEstandar.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		for(int i = 1;i<modeloIndividualEstandar.getColumnCount();i++) {
@@ -678,6 +699,26 @@ public class OcuparHabitacion extends JPanel{
 			tablaSuiteDoble.getColumnModel().getColumn(i).setMaxWidth(130);
 			tablaSuiteDoble.getColumnModel().getColumn(i).setMinWidth(130);
 		}
+		
+		tablaIndividualEstandar.getColumnModel().setColumnSelectionAllowed(true);
+		tablaIndividualEstandar.getColumnModel().getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tablaIndividualEstandar.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		
+		tablaDobleEstandar.getColumnModel().setColumnSelectionAllowed(true);
+		tablaDobleEstandar.getColumnModel().getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tablaDobleEstandar.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		
+		tablaDobleSuperior.getColumnModel().setColumnSelectionAllowed(true);
+		tablaDobleSuperior.getColumnModel().getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tablaDobleSuperior.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		
+		tablaSuperiorFamilyPlan.getColumnModel().setColumnSelectionAllowed(true);
+		tablaSuperiorFamilyPlan.getColumnModel().getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tablaSuperiorFamilyPlan.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		
+		tablaSuiteDoble.getColumnModel().setColumnSelectionAllowed(true);
+		tablaSuiteDoble.getColumnModel().getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tablaSuiteDoble.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		
 		
 	}
@@ -834,9 +875,119 @@ public class OcuparHabitacion extends JPanel{
 		
 	}
 	
-	private void fechasReservadas() {
+	private void accionSegunEstado(ModeloTablaHabitaciones modelo, TablaJ tabla) {
+		int[] filas = tabla.getSelectedRows();
+		int columna = tabla.getSelectedColumn();
+		
+		if(columna != 0) { //Si se seleccionan celdas de una columna que no sea la de las fechas
+			if(seleccionHecha) { //Si ya hay una seleccion, deseleccionarla
+				marcarDesocupar(inicioRango, finalRango, columnaRango, modeloSeleccionado);
+			}
+			
+			Boolean fueraDeServicioFlag = false, ocupadaFlag = false, reservadaFlag = false;
+			List<LocalDate> fechasReservadas = new ArrayList<LocalDate>();
+			HabitacionDTO habitacion = null;
+			
+			for(int i=filas[0];i<=filas[filas.length-1];i++) {
+				Object celda = modelo.getValueAt(i, columna);
+				
+				if(celda.getClass() == HabitacionIndividualDTO.class) habitacion = (HabitacionIndividualDTO) celda;
+				if(celda.getClass() == HabitacionDobleEstandarDTO.class) habitacion = (HabitacionDobleEstandarDTO) celda;
+				if(celda.getClass() == HabitacionDobleSuperiorDTO.class) habitacion = (HabitacionDobleSuperiorDTO) celda;
+				if(celda.getClass() == HabitacionFamilyDTO.class) habitacion = (HabitacionFamilyDTO) celda;
+				if(celda.getClass() == HabitacionSuiteDTO.class) habitacion = (HabitacionSuiteDTO) celda;
+				
+				if(habitacion.getEstado_actual().get() == EstadoHabitacion.FUERA_DE_SERVICIO) fueraDeServicioFlag = true;
+				if(habitacion.getEstado_actual().get() == EstadoHabitacion.OCUPADA) ocupadaFlag = true;
+				if(habitacion.getEstado_actual().get() == EstadoHabitacion.RESERVADA) {
+					reservadaFlag = true;
+					fechasReservadas.add((LocalDate) modelo.getValueAt(i, 0));
+				}
+			}
+			
+			if(fueraDeServicioFlag) {
+				errorFueraDeServicio();
+			}
+			else {
+				if(ocupadaFlag) {
+					errorOcupada();
+				}
+				else {
+					if(reservadaFlag) {
+						fechasReservadas(fechasReservadas,habitacion,modelo,filas[0],filas[filas.length-1],columna);
+					}
+					else {
+						marcarOcupar(filas[0], filas[filas.length-1], columna, modelo);
+					}
+				}
+			}
+		}
+	}
+	
+	private void errorFueraDeServicio() {
+		String mensaje = "<html><body>La habitación se encuentra fuera de servicio.<br>Por favor seleccione otra.</body></html>";
+		MensajeError habFueraDeServicio = new MensajeError(App.getVentana(),mensaje,"Aceptar","");
+		habFueraDeServicio.getContentPane().remove(3);
+		
+		App.getVentana().setEnabled(false);
+		habFueraDeServicio.pack();
+		habFueraDeServicio.setLocationRelativeTo(App.getVentana());
+		habFueraDeServicio.setVisible(true);
+		
+		habFueraDeServicio.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+			}
+		});
+		
+		ActionListener listenerAceptar = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				habFueraDeServicio.dispose();
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+			}
+		 };
+		 
+		 habFueraDeServicio.setListeners(listenerAceptar, null);
+	}
+	
+	private void errorOcupada() {
+		String mensaje = "<html><body>La habitación se encuentra ocupada en el rango<br>de fechas indicadas. Seleccione otra habitación<br>u otro rango de fechas.</body></html>";
+		MensajeError habOcupada = new MensajeError(App.getVentana(),mensaje,"Aceptar","");
+		habOcupada.getContentPane().remove(3);
+		
+		App.getVentana().setEnabled(false);
+		habOcupada.pack();
+		habOcupada.setLocationRelativeTo(App.getVentana());
+		habOcupada.setVisible(true);
+		
+		habOcupada.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+			}
+		});
+		
+		ActionListener listenerAceptar = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				habOcupada.dispose();
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+			}
+		 };
+		 
+		 habOcupada.setListeners(listenerAceptar, null);
+	}
+	
+	private void fechasReservadas(List<LocalDate> fechas, HabitacionDTO habitacion, ModeloTablaHabitaciones modelo, Integer inicioFila, Integer finalFila, Integer columna) {
+		JDialog ventanaFechasReservadas;
+		FechasReservadas panelFechasReservadas;
+		
 		ventanaFechasReservadas = new JDialog(App.getVentana(),"Hotel Premier - Fechas Reservadas");
-		panelFechasReservadas = new FechasReservadas(new ArrayList<ReservaDTO>());
+		panelFechasReservadas = new FechasReservadas(fechas,habitacion.getNro().get());
 		ventanaFechasReservadas.setContentPane(panelFechasReservadas);
 		
 		App.getVentana().setEnabled(false);
@@ -853,11 +1004,11 @@ public class OcuparHabitacion extends JPanel{
 		
 		panelFechasReservadas.getOcuparIgual().addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				//TODO pintar celdas con "A ocupar"
+			public void actionPerformed(ActionEvent e) {	
+				marcarOcupar(inicioFila, finalFila, columna, modelo);
 				ventanaFechasReservadas.dispose();
 				App.getVentana().setEnabled(true);
-				App.getVentana().setVisible(true);
+				App.getVentana().setVisible(true);	
 			}
 		});
 		
@@ -871,44 +1022,50 @@ public class OcuparHabitacion extends JPanel{
 		});
 	}
 	
-	private Boolean accionSegunEstado(Integer x, Integer y) { //Retorna true si se debe pintar como a ocupar y false si no
-		return true;
-	}
-
-	private void marcarOcupar(Integer x, Integer y, ModeloTablaHabitaciones modelo) {
-		HabitacionDTO h = (HabitacionDTO) modelo.getValueAt(x, y);
-		h.setAOcupar(true);
-		modelo.setValueAt(h, x, y);
-		modelo.fireTableDataChanged();
+	private void marcarOcupar(Integer inicioFila, Integer finalFila, Integer columna, ModeloTablaHabitaciones modelo) {
+		
+		for(int i=inicioFila;i<=finalFila;i++) {
+			HabitacionDTO aux = (HabitacionDTO) modelo.getValueAt(i, columna);
+			aux.setAOcupar(true);
+			modelo.setValueAt(aux, i, columna);
+			modelo.fireTableDataChanged();
+		}
+		
+		Object h = modelo.getValueAt(inicioFila, columna);
+		
+		if(h.getClass() == HabitacionIndividualDTO.class) habSeleccionada = (HabitacionIndividualDTO) h;
+		if(h.getClass() == HabitacionDobleEstandarDTO.class) habSeleccionada = (HabitacionDobleEstandarDTO) h;
+		if(h.getClass() == HabitacionDobleSuperiorDTO.class) habSeleccionada = (HabitacionDobleSuperiorDTO) h;
+		if(h.getClass() == HabitacionFamilyDTO.class) habSeleccionada = (HabitacionFamilyDTO) h;
+		if(h.getClass() == HabitacionSuiteDTO.class) habSeleccionada = (HabitacionSuiteDTO) h;
+		
+		modeloSeleccionado = modelo;
+		fechaInicial = (LocalDate) modelo.getValueAt(inicioFila, 0);
+		fechaFinal = (LocalDate) modelo.getValueAt(finalFila, 0);
+		inicioRango = inicioFila;
+		finalRango = finalFila;
+		columnaRango = columna;
+		
+		seleccionHecha = true;
 	}
 	
-	private void errorHabitacionDistinta() {
-		String mensaje = "<html><body>Debe seleccionar la fecha final para la siguiente habitación:<br>"
-				+habitacionSeleccionada.toString()+"</body></html>";
-		MensajeError habitacionDistinta = new MensajeError(App.getVentana(),mensaje,"Aceptar","");
-		habitacionDistinta.getContentPane().remove(3);
+	private void marcarDesocupar(Integer inicioFila, Integer finalFila, Integer columna, ModeloTablaHabitaciones modelo) {
+		for(int i=inicioFila;i<=finalFila;i++) {
+			HabitacionDTO aux = (HabitacionDTO) modelo.getValueAt(i, columna);
+			aux.setAOcupar(false);
+			modelo.setValueAt(aux, i, columna);
+			modelo.fireTableDataChanged();
+		}
 		
-		App.getVentana().setEnabled(false);
-		habitacionDistinta.pack();
-		habitacionDistinta.setLocationRelativeTo(App.getVentana());
-		habitacionDistinta.setVisible(true);
+		modeloSeleccionado = null;
+		habSeleccionada = null;
+		fechaInicial = null;
+		fechaFinal = null;
+		inicioRango = null;
+		finalRango = null;
+		columnaRango = null;
 		
-		habitacionDistinta.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				App.getVentana().setEnabled(true);
-				App.getVentana().setVisible(true);
-			}
-		});
-		
-		ActionListener listenerAceptar = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				habitacionDistinta.dispose();
-				App.getVentana().setEnabled(true);
-				App.getVentana().setVisible(true);
-			}
-		 };
-		 
-		 habitacionDistinta.setListeners(listenerAceptar, null);
+		seleccionHecha = false;
 	}
+	
 }

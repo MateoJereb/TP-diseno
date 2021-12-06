@@ -21,6 +21,7 @@ import clases.dto.HabitacionDobleSuperiorDTO;
 import clases.dto.HabitacionFamilyDTO;
 import clases.dto.HabitacionIndividualDTO;
 import clases.dto.HabitacionSuiteDTO;
+import clases.dto.ReservaDTO;
 import enums.EstadoHabitacion;
 
 public class GestorReservas {
@@ -145,6 +146,42 @@ public class GestorReservas {
 		dto.setEstado_actual(estado_actual);
 		dto.setDescuento(descuento);
 		dto.setDiasParaDescuento(diasParaDescuento);
+		
+		return dto;
+		
+	}
+	
+	public Map<LocalDate,ReservaDTO> reservasPorDiaParaHabitacion(List<LocalDate> fechas, Integer nroHabitacion){
+		Map<LocalDate,ReservaDTO> salida = new LinkedHashMap<LocalDate, ReservaDTO>();
+		
+		AdministradorBDReservas adminBD = new AdministradorBDReservas();
+		List<Reserva> reservas = adminBD.recuperarReservasHabitacion(nroHabitacion);
+		
+		for(LocalDate f : fechas) {
+			Reserva res = reservas.stream().filter(r -> entreFechas(f,r.getEntrada(),r.getSalida())).findFirst().get();
+			ReservaDTO dto = generarDTOReserva(res);
+			salida.put(f, dto);
+		}
+		
+		
+		return salida;
+	}
+	
+	private ReservaDTO generarDTOReserva(Reserva r) {
+		Integer id = r.getId();
+		LocalDate entrada = r.getEntrada();
+		LocalDate salida = r.getSalida();
+		String nombre = r.getNombre();
+		String apellido = r.getApellido();
+		String telefono = r.getTelefono();
+		
+		ReservaDTO dto = new ReservaDTO();
+		dto.setId(id);
+		dto.setEntrada(entrada);
+		dto.setSalida(salida);
+		dto.setNombre(nombre);
+		dto.setApellido(apellido);
+		dto.setTelefono(telefono);
 		
 		return dto;
 		

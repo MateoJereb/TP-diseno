@@ -1,66 +1,67 @@
 package clases.dto;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class ReservaDTO {
 
-	private Integer id;
-	private LocalDate entrada;
-	private LocalDate salida;
-	private String nombre;
-	private String apellido;
-	private String telefono;
+	private Optional<Integer> id;
+	private Optional<LocalDate> entrada;
+	private Optional<LocalDate> salida;
+	private Optional<String> nombre;
+	private Optional<String> apellido;
+	private Optional<String> telefono;
 	
 	public ReservaDTO() {
 		super();
 	}
 
-	public Integer getId() {
-		return id;
-	}
-
 	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	public LocalDate getEntrada() {
-		return entrada;
+		this.id = Optional.of(id);
 	}
 
 	public void setEntrada(LocalDate entrada) {
-		this.entrada = entrada;
-	}
-
-	public LocalDate getSalida() {
-		return salida;
+		this.entrada = Optional.of(entrada);
 	}
 
 	public void setSalida(LocalDate salida) {
-		this.salida = salida;
-	}
-
-	public String getNombre() {
-		return nombre;
+		this.salida = Optional.of(salida);
 	}
 
 	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
-
-	public String getApellido() {
-		return apellido;
+		this.nombre = Optional.of(nombre);
 	}
 
 	public void setApellido(String apellido) {
-		this.apellido = apellido;
-	}
-
-	public String getTelefono() {
-		return telefono;
+		this.apellido = Optional.of(apellido);
 	}
 
 	public void setTelefono(String telefono) {
-		this.telefono = telefono;
+		this.telefono = Optional.of(telefono);
+	}
+
+	public Optional<Integer> getId() {
+		return id;
+	}
+
+	public Optional<LocalDate> getEntrada() {
+		return entrada;
+	}
+
+	public Optional<LocalDate> getSalida() {
+		return salida;
+	}
+
+	public Optional<String> getNombre() {
+		return nombre;
+	}
+
+	public Optional<String> getApellido() {
+		return apellido;
+	}
+
+	public Optional<String> getTelefono() {
+		return telefono;
 	}
 	
 	
