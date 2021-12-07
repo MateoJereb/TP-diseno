@@ -18,13 +18,13 @@ public class App {
 	
 	public static void main(String[] args) {
 		
-		//menuPrincipal();
+		menuPrincipal();
 		
 		LocalDate dic1 = LocalDate.parse("01-12-2021",DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 		LocalDate dic31 = LocalDate.parse("31-12-2021",DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-		HabitacionDTO hab = new HabitacionDobleEstandarDTO();
-		hab.setCapacidad(2);
-		hab.setNro(5);
+		HabitacionDTO hab = new HabitacionFamilyDTO();
+		hab.setCapacidad(5);
+		hab.setNro(4);
 		PasajeroDTO p = new PasajeroDTO();
 		p.setId(1);
 		p.setApellido("Jereb");
@@ -32,7 +32,7 @@ public class App {
 		p.setTipo("DNI");
 		p.setNro_doc("43287075");
 		
-		ocuparHabitacion(Optional.of(p),Optional.of(dic1),Optional.of(dic31));
+		//ocuparHabitacion(Optional.of(p),Optional.of(dic1),Optional.of(dic31));
 		
 		//cargarPasajeros(hab,LocalDate.now(),LocalDate.now().plusDays(1),Optional.of(p));
 		

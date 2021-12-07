@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,7 +18,10 @@ import clases.HabitacionDobleSuperior;
 import clases.HabitacionFamily;
 import clases.HabitacionIndividual;
 import clases.HabitacionSuite;
+import clases.Pasajero;
+import clases.dto.PasajeroDTO;
 import enums.EstadoHabitacion;
+import excepciones.OcupanteEnOtraHabitacionException;
 
 public class AdministradorBDEstadias extends AdministradorBD {
 
@@ -114,4 +118,114 @@ public class AdministradorBDEstadias extends AdministradorBD {
 		return salida;
 	}
 	
+	public void registrarEstadia(Estadia estadia) throws OcupanteEnOtraHabitacionException{
+		Connection conexion = getConnection();
+        Statement sentencia = null;
+        Statement sentencia2 = null;
+        ResultSet resultado = null;
+        ResultSet resultado2 = null;
+        
+        try {
+        	//Verificar que los pasajeros no estén ocupando otra habitación
+        	List<PasajeroDTO> pasajerosConOcupacionesActuales = new ArrayList<PasajeroDTO>();
+        	
+        	for(Pasajero ocupante : estadia.getPasajeros()) {
+        		String consulta = "SELECT es.hora_entrada, es.hora_salida "
+        						+ "FROM tp_12c.estadia es, tp_12c.hospeda_en he "
+        						+ "WHERE es.id_estadia = he.id_estadia "
+        						+ "AND he.id_pasajero = "+ocupante.getId();
+        		
+        		sentencia = conexion.createStatement();
+        		resultado = sentencia.executeQuery(consulta);
+        		
+        		while(resultado.next()) {
+        			LocalDateTime comienzo = LocalDateTime.parse(resultado.getString(1),DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        			LocalDateTime fin = LocalDateTime.parse(resultado.getString(2),DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        			
+        			if(rangosSuperpuestos(comienzo,fin,estadia.getHora_entrada(),estadia.getHora_salida())) {
+        				PasajeroDTO dto = new PasajeroDTO();
+        				dto.setApellido(ocupante.getApellido());
+        				dto.setNombre(ocupante.getNombre());
+        				dto.setTipo(ocupante.getTipo_doc().getTipo());
+        				dto.setNro_doc(ocupante.getNro_doc());
+        				pasajerosConOcupacionesActuales.add(dto);
+        			}
+        		}
+        		
+        		System.out.println("Consulta realizada: "+consulta);
+        	}
+        	
+        	if(pasajerosConOcupacionesActuales.size() > 0) throw new OcupanteEnOtraHabitacionException(pasajerosConOcupacionesActuales);
+        	else {       		
+        		//Buscar la proxima id
+        		Integer id = null;
+        		String consultaProxId = "SELECT nextval('tp_12c.sec_estadia')";
+        		sentencia2 = conexion.createStatement();
+        		resultado2 = sentencia2.executeQuery(consultaProxId);
+        		
+        		while(resultado2.next()) id = resultado2.getInt(1);
+        		
+        		System.out.println("Consulta realiazda: "+consultaProxId);
+        		
+        		conexion.setAutoCommit(false);
+        		
+        		//Estadia
+        		Integer nro_habitacion = estadia.getHabitacion().getNro();
+        		Integer id_responsable = estadia.getResponsable().getId();
+        		String hora_entrada = estadia.getHora_entrada().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        		String hora_salida = estadia.getHora_salida().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        		
+        		String insercionEstadia = "INSERT INTO tp_12c.estadia VALUES "
+        				+ "("+id+","+nro_habitacion+","+id_responsable+",'"+hora_entrada+"','"+hora_salida+"',null,false)";
+        		
+        		sentencia2.executeUpdate(insercionEstadia);
+        		
+        		//Hospeda en
+        		String insercionHospeda = "INSERT INTO tp_12c.hospeda_en VALUES ";
+        		
+        		for(int i=0;i<estadia.getPasajeros().size()-1;i++) {
+        			Pasajero ocupante = estadia.getPasajeros().get(i);
+        			Integer id_pasajero = ocupante.getId();
+        			insercionHospeda+="(currval('tp_12c.sec_estadia'),"+id_pasajero+"),";
+        		}
+        		insercionHospeda+="("+estadia.getPasajeros().get(estadia.getPasajeros().size()-1).getId()+","+id+")";
+        		
+        		sentencia2.executeUpdate(insercionHospeda);
+        		
+        		String cambiarEstadoHabitacion = "UPDATE tp_12c.habitacion SET estado_actual = 'O' WHERE nro_habitacion ="+nro_habitacion;
+        		if(estadia.getHora_entrada().toLocalDate().equals(LocalDate.now())) { //Si es el dia actual, cambiar el estado de la habitacion a ocupada
+        			sentencia2.execute(cambiarEstadoHabitacion);
+        		}
+        		
+        		conexion.commit();
+        		
+        		System.out.println("Inserción realizada: "+insercionEstadia);
+        		System.out.println("Inserción realizada: "+insercionHospeda);
+        		if(estadia.getHora_entrada().toLocalDate().equals(LocalDate.now())) System.out.println("Actualización realizada: "+cambiarEstadoHabitacion);
+        		
+        	}
+        	
+        }catch(SQLException e) {
+			e.printStackTrace();
+			try {
+				conexion.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		}
+        finally {
+            if(resultado!=null) try { resultado.close();} catch(SQLException e) {e.printStackTrace();}
+            if(sentencia!=null) try { sentencia.close();} catch(SQLException e) {e.printStackTrace();}
+            if(resultado2!=null) try { resultado2.close();} catch(SQLException e) {e.printStackTrace();}
+            if(sentencia2!=null) try { sentencia2.close();} catch(SQLException e) {e.printStackTrace();}
+            if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
+        }
+	}
+	
+	private Boolean rangosSuperpuestos(LocalDateTime c, LocalDateTime f, LocalDateTime he, LocalDateTime hs) {
+		if(he.isBefore(c) && hs.isBefore(c)) return false;
+		if(he.isAfter(f) && hs.isAfter(f)) return false;
+		
+		return true;
+	}
 }

@@ -70,6 +70,7 @@ public class TablaJ extends JTable{
 					setBackground(new Color(255,200,200));
 					setForeground(Color.BLACK);
 					setHorizontalAlignment(EtiquetaJ.CENTER);
+					if(hasFocus || isSelected) setBackground(UIManager.getColor("Table.selectionBackground"));
 				}
 				else {
 					if(hab.getEstado_actual().get() == EstadoHabitacion.FUERA_DE_SERVICIO) {

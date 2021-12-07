@@ -2,6 +2,7 @@ package clases.gestores;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,8 +10,12 @@ import java.util.stream.Collectors;
 
 import base_de_datos.AdministradorBDEstadias;
 import clases.Estadia;
+import clases.Habitacion;
+import clases.Pasajero;
 import clases.dto.HabitacionDTO;
+import clases.dto.PasajeroDTO;
 import enums.EstadoHabitacion;
+import excepciones.OcupanteEnOtraHabitacionException;
 
 public class GestorEstadias {
 
@@ -66,5 +71,25 @@ public class GestorEstadias {
 		if(fecha.isBefore(comienzoRango) || fecha.isAfter(finalRango)) return false;
 		
 		return true;
+	}
+
+	public void ocuparHabitacion(HabitacionDTO hab, List<PasajeroDTO> ocup, PasajeroDTO resp, LocalDate fechaDesde, LocalDate fechaHasta) throws OcupanteEnOtraHabitacionException{
+		GestorPasajeros gestorP = GestorPasajeros.getInstance();
+		Pasajero responsable = gestorP.convertirDTO(resp);
+		List<Pasajero> ocupantes = gestorP.convertirDTO(ocup);
+		
+		GestorHabitaciones gestorH = GestorHabitaciones.getInstance();
+		Habitacion habitacion = gestorH.convertirDTO(hab);
+		
+		LocalDateTime hora_entrada = fechaDesde.atTime(LocalTime.now());
+		LocalDateTime hora_salida = fechaHasta.atTime(10,0);
+		
+		Estadia estadia = new Estadia(null,hora_entrada,hora_salida,null,false);
+		estadia.setHabitacion(habitacion);
+		estadia.setResponsable(responsable);
+		estadia.setPasajeros(ocupantes);
+		
+		AdministradorBDEstadias adminBD = new AdministradorBDEstadias();
+		adminBD.registrarEstadia(estadia);
 	}
 }

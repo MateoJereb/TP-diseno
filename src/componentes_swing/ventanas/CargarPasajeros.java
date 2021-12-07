@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,12 +36,15 @@ import javax.swing.table.TableRowSorter;
 
 import clase_app.App;
 import clases.dto.*;
+import clases.gestores.GestorEstadias;
 import clases.gestores.GestorPasajeros;
 import componentes_swing.*;
 import componentes_swing.modelos_tablas.ModeloTablaPasajeros;
 import componentes_swing.modelos_tablas.ModeloTablaPasajerosAgregados;
 import componentes_swing.retroalimentacion.MensajeConfirmacion;
+import componentes_swing.retroalimentacion.MensajeError;
 import componentes_swing.retroalimentacion.MensajeInformativo;
+import excepciones.OcupanteEnOtraHabitacionException;
 
 public class CargarPasajeros extends JPanel{
 
@@ -74,6 +78,7 @@ public class CargarPasajeros extends JPanel{
 	private TablaJ tablaAgregados;
 	private List<PasajeroDTO> pasajerosAgregados = new ArrayList<PasajeroDTO>();
 	private JPanel panelBotones;
+	private CheckBoxJ responsableOcupaLugar;
 	private EtiquetaJ capacidadAlcanzada;
 	private BotonJ siguiente;
 	private BotonJ cancelar;
@@ -116,16 +121,17 @@ public class CargarPasajeros extends JPanel{
 		panelInferior.setBackground(UIManager.getColor("CheckBox.focus"));
 		add(panelInferior,cons);
 		
-		panelInformacion(habitacion);
+		panelInformacion(habitacion,fechaDesde,fechaHasta);
 		panelBusqueda();
 		panelResultados();
 		panelAgregados();
 		listeners(habitacion,responsable,fechaDesde,fechaHasta);
 		
 		if(responsable.isPresent()) inicializarResponsable(responsable);
+		else responsableOcupaLugar.setSelected(true);
 	}
 	
-	private void panelInformacion(HabitacionDTO habitacion) {
+	private void panelInformacion(HabitacionDTO habitacion, LocalDate fechaDesde, LocalDate fechaHasta) {
 		GridBagConstraints cons = new GridBagConstraints();
 		TitledBorder borde  = BorderFactory.createTitledBorder("Información Habitación");
 		borde.setTitleFont(new Font("Microsoft Tai Le",Font.PLAIN,14));
@@ -147,13 +153,16 @@ public class CargarPasajeros extends JPanel{
 		cons.anchor = GridBagConstraints.NORTH;
 		panelSuperior.add(panelInformacion,cons);
 		
-		eInfo = new EtiquetaJ("<html><body>Se está ocupando la habitación:<br><br>\u2022Nro: "+habitacion.getNro().get()+"<br><br>\u2022Tipo: "+textoTipoHab(habitacion)+"<br><br></html></body>");
+		String desdeAux = fechaDesde.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		String hastaAux = fechaHasta.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		
+		eInfo = new EtiquetaJ("<html><body>Se está ocupando la habitación:<br><br>\u2022Nro: "+habitacion.getNro().get()+"<br>\u2022Tipo: "+textoTipoHab(habitacion)+"<br>\u2022Desde: "+desdeAux+"<br>\u2022Hasta: "+hastaAux+"<br><br></html></body>");
 		
 		cons.weighty = 0.1;
 		cons.weightx = 0.1;
 		cons.fill = GridBagConstraints.NONE;
 		cons.anchor = GridBagConstraints.CENTER;
-		cons.insets = new Insets(0,20,0,20);
+		cons.insets = new Insets(0,10,5,10);
 		panelInformacion.add(eInfo,cons);
 	}
 	
@@ -337,6 +346,7 @@ public class CargarPasajeros extends JPanel{
 		cons.insets = new Insets(10,10,5,25);
 		panelInferior.add(menuPrincipal,cons);
 		
+		responsableOcupaLugar = new CheckBoxJ("Responsable ocupa lugar");
 		capacidadAlcanzada = new EtiquetaJ("Capacidad de la habitación alcanzada");
 		siguiente = new BotonJ("Siguiente");
 		cancelar = new BotonJ("Cancelar");
@@ -344,7 +354,7 @@ public class CargarPasajeros extends JPanel{
 		panelBotones = new JPanel(new GridBagLayout());
 		panelBotones.setBackground(Color.WHITE);
 		cons.gridx = 0;
-		cons.gridy = 1;
+		cons.gridy = 2;
 		cons.gridwidth = 1;
 		cons.gridheight = 1;
 		cons.weightx = 0;
@@ -353,6 +363,16 @@ public class CargarPasajeros extends JPanel{
 		cons.insets = new Insets(0,20,0,10);
 		cons.anchor = GridBagConstraints.SOUTHEAST;
 		panelAgregados.add(panelBotones,cons);
+		
+		cons.gridx=0;
+		cons.gridy=1;
+		cons.weighty = 0;
+		cons.weightx = 0;
+		cons.gridwidth = 3;
+		cons.fill = GridBagConstraints.NONE;
+		cons.anchor = GridBagConstraints.WEST;
+		cons.insets = new Insets(0,10,10,0);
+		panelAgregados.add(responsableOcupaLugar,cons);
 		
 		cons.gridy = 1;
 		cons.weighty = 0.01;
@@ -428,7 +448,22 @@ public class CargarPasajeros extends JPanel{
 		siguiente.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//TODO listener siguiente
+				if(tablaAgregados.getRowCount() > 0) {
+					if(responsableSeleccionado()) {
+						if(!responsablePeroNoOcupantes()) {
+							cargarOtraHabitacion(habitacion,fechaDesde,fechaHasta);
+						}
+						else {
+							errorValidacionPasajeros("<html><body>Se seleccionó un responsable que no ocupa la habitación<br>y no hay ningún otro ocupante agregado.</body></html>","Aceptar");
+						}
+					}
+					else { 
+						errorValidacionPasajeros("No se seleccionó ningún pasajero como responsable.","Aceptar");
+					}
+				}
+				else {
+					errorValidacionPasajeros("No se agregó ningún pasajero como ocupante.","Aceptar");
+				}
 			}
 		});
 		
@@ -531,9 +566,13 @@ public class CargarPasajeros extends JPanel{
 				pasajeroDTO.setId(id);
 				
 				if(!pasajerosAgregados.contains(pasajeroDTO)) {
-					if(modeloAgregados.getRowCount() < habitacion.getCapacidad().get()) {
+					Integer capacidadPermitida = habitacion.getCapacidad().get();;
+					if(responsableSeleccionado() && !responsableOcupaLugar.isSelected()) capacidadPermitida++;
+					
+					if(modeloAgregados.getRowCount() < capacidadPermitida) {
 						pasajerosAgregados.add(pasajeroDTO);
 						actualizarTablaAgregados(pasajeroDTO);
+						capacidadAlcanzada.setForeground(Color.WHITE);
 					}
 					else {
 						capacidadAlcanzada.setForeground(Color.RED);
@@ -566,15 +605,88 @@ public class CargarPasajeros extends JPanel{
 				Integer fila = tablaAgregados.getSelectedRow();
 				Boolean valor = (Boolean) modeloAgregados.getValueAt(fila, 5);
 				
-				if(valor) {
+				if(valor) { //Si se selecciona uno, se deselecciona el que ya esta seleccionado (si lo hay)
 					for(int i=0;i<tablaAgregados.getRowCount();i++) {
 						if(i != fila) modeloAgregados.setValueAt(false, i, 5);
 					}
+					modeloAgregados.fireTableDataChanged();
 				}
+				else { //No se puede deseleccionar al responsable si no ocupa lugar y la capacidad maxima de acompañantes esta alcanzada
+					if(!responsableOcupaLugar.isSelected() && tablaAgregados.getRowCount() == habitacion.getCapacidad().get()+1) {
+						String mensaje = "<html><body>La cantidad de acompañantes cubre la capacidad máxima de la habitación<br>"
+													+ "y está indicado que el responsable no ocupa lugar.<br><br>"
+													+ "Por favor elimine un pasajero para poder deseleccionar al responsable.</body></html>";
+						MensajeError desbordeDeCapacidad = new MensajeError(App.getVentana(),mensaje,"Aceptar","");
+						desbordeDeCapacidad.getContentPane().remove(3);
+						
+						App.getVentana().setEnabled(false);
+						desbordeDeCapacidad.pack();
+						desbordeDeCapacidad.setLocationRelativeTo(App.getVentana());
+						desbordeDeCapacidad.setVisible(true);
+						
+						desbordeDeCapacidad.addWindowListener(new WindowAdapter() {
+							public void windowClosing(WindowEvent e) {
+								App.getVentana().setEnabled(true);
+								App.getVentana().setVisible(true);
+							}
+						});
+						
+						ActionListener listenerAceptar = new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								desbordeDeCapacidad.dispose();
+								App.getVentana().setEnabled(true);
+								App.getVentana().setVisible(true);
+							}
+						 };
+						 
+						 desbordeDeCapacidad.setListeners(listenerAceptar, null);
+						 
+						 modeloAgregados.setValueAt(true, fila, 5);
+						 modeloAgregados.fireTableDataChanged();
+					}
+				}
+				
 			}
 
 			@Override
 			public void editingCanceled(ChangeEvent e) {}
+		});
+
+		responsableOcupaLugar.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(responsableOcupaLugar.isSelected() && tablaAgregados.getRowCount() == habitacion.getCapacidad().get()+1) { //Si los acompañantes cubren la capacidad máxima, el responsable no puede ocupar lugar
+					String mensaje = "<html><body>La cantidad de acompañantes cubre la capacidad máxima de la habitación.<br><br>"
+												+ "Por favor elimine un pasajero para que el responsable pueda ocupar un lugar.</body></html>";
+					MensajeError desbordeDeCapacidad = new MensajeError(App.getVentana(),mensaje,"Aceptar","");
+					desbordeDeCapacidad.getContentPane().remove(3);
+					
+					App.getVentana().setEnabled(false);
+					desbordeDeCapacidad.pack();
+					desbordeDeCapacidad.setLocationRelativeTo(App.getVentana());
+					desbordeDeCapacidad.setVisible(true);
+					
+					desbordeDeCapacidad.addWindowListener(new WindowAdapter() {
+						public void windowClosing(WindowEvent e) {
+							App.getVentana().setEnabled(true);
+							App.getVentana().setVisible(true);
+						}
+					});
+					
+					ActionListener listenerAceptar = new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							desbordeDeCapacidad.dispose();
+							App.getVentana().setEnabled(true);
+							App.getVentana().setVisible(true);
+						}
+					};
+					
+					desbordeDeCapacidad.setListeners(listenerAceptar, null);
+					responsableOcupaLugar.setSelected(false);
+				}
+			}
 		});
 	}
 
@@ -636,7 +748,7 @@ public class CargarPasajeros extends JPanel{
 		modeloAgregados.fireTableDataChanged();	
 	}
 	
-	private void cargarOtraHabitacion(LocalDate fechadesde, LocalDate fechaHasta) {
+	private void cargarOtraHabitacion(HabitacionDTO habitacion, LocalDate fechaDesde, LocalDate fechaHasta) {
 		ventanaCargarOtraHabitacion = new JDialog(App.getVentana(),"Hotel Premier - Cargar otra habitación");
 		panelCargarOtraHabitacion = new CargarOtraHabitacion();
 		ventanaCargarOtraHabitacion.setContentPane(panelCargarOtraHabitacion);
@@ -665,12 +777,27 @@ public class CargarPasajeros extends JPanel{
 		panelCargarOtraHabitacion.getCargarOtraHabitacion().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//TODO actualizar informacion
-				ventanaCargarOtraHabitacion.dispose();
-				App.getVentana().setEnabled(true);
-				App.getVentana().setVisible(true);
 				
-				//TODO -> instancias PasajeroDTO responsable y pasarlo como parametro
+				try {
+					PasajeroDTO resp = guardarEstadia(habitacion, fechaDesde, fechaHasta);
+					
+					ventanaCargarOtraHabitacion.dispose();
+					App.getVentana().setEnabled(true);
+					App.getVentana().setVisible(true);
+					App.ocuparHabitacion(Optional.of(resp), Optional.of(fechaDesde), Optional.of(fechaHasta));
+					
+				} catch (OcupanteEnOtraHabitacionException e1) {
+					ventanaCargarOtraHabitacion.dispose();
+					App.getVentana().setEnabled(true);
+					App.getVentana().setVisible(true);
+					
+					String mensaje = "<html><body>Los siguientes pasajeros ya están ocupando una habitación:<br><br>";
+					for(PasajeroDTO pj : e1.getPasajeros()) {
+						mensaje+=pj.getNombre().get()+" "+pj.getApellido().get()+" ("+pj.getTipo().get()+" - "+pj.getNro_doc().get()+")<br>";
+					}
+					mensaje+="</body></html>";
+					errorValidacionPasajeros(mensaje, "Cambiar ocupantes");
+				}
 				
 			}
 		});
@@ -678,15 +805,59 @@ public class CargarPasajeros extends JPanel{
 		panelCargarOtraHabitacion.getSalir().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//TODO actualizar informacion
-				ventanaCargarOtraHabitacion.dispose();
-				App.getVentana().setEnabled(true);
-				App.getVentana().setVisible(true);
-				App.menuPrincipal();
+				try {
+					guardarEstadia(habitacion, fechaDesde, fechaHasta);
+					ventanaCargarOtraHabitacion.dispose();
+					App.getVentana().setEnabled(true);
+					App.getVentana().setVisible(true);
+					App.menuPrincipal();
+					
+				} catch (OcupanteEnOtraHabitacionException e1) {
+					ventanaCargarOtraHabitacion.dispose();
+					App.getVentana().setEnabled(true);
+					App.getVentana().setVisible(true);
+					
+					String mensaje = "<html><body>Los siguientes pasajeros ya están ocupando una habitación:<br><br>";
+					for(PasajeroDTO pj : e1.getPasajeros()) {
+						mensaje+=pj.getNombre().get()+" "+pj.getApellido().get()+" ("+pj.getTipo().get()+" - "+pj.getNro_doc().get()+")<br>";
+					}
+					mensaje+="</body></html>";
+					errorValidacionPasajeros(mensaje, "Cambiar ocupantes");
+				}
+				
 			}
 		});
 	}
 
+	private PasajeroDTO guardarEstadia(HabitacionDTO habitacion, LocalDate fechaDesde, LocalDate fechaHasta) throws OcupanteEnOtraHabitacionException {
+		PasajeroDTO pasajeroResponsable = new PasajeroDTO();
+		
+		List<PasajeroDTO> listaOcupantes = new ArrayList<PasajeroDTO>();
+		
+		for(int i=0;i<tablaAgregados.getRowCount();i++) {
+			PasajeroDTO dto = new PasajeroDTO();
+			dto.setId((Integer) modeloAgregados.getValueAt(i, 4));
+			dto.setApellido((String)modeloAgregados.getValueAt(i, 0));
+			dto.setNombre((String)modeloAgregados.getValueAt(i, 1));
+			dto.setTipo((String)modeloAgregados.getValueAt(i, 2));
+			dto.setNro_doc((String)modeloAgregados.getValueAt(i, 3));
+			
+			Boolean esResponsable = (Boolean) modeloAgregados.getValueAt(i, 5);
+			if(esResponsable) {
+				pasajeroResponsable = dto;
+				if(responsableOcupaLugar.isSelected()) listaOcupantes.add(dto);
+			}
+			else {
+				listaOcupantes.add(dto);
+			}	
+		}
+		
+		GestorEstadias gestor = GestorEstadias.getInstance();
+		gestor.ocuparHabitacion(habitacion, listaOcupantes, pasajeroResponsable, fechaDesde, fechaHasta);
+			
+		return pasajeroResponsable;
+	}
+	
 	private void inicializarResponsable(Optional<PasajeroDTO> p) {
 		Vector<Object> fila = new Vector<Object>();
 		
@@ -702,5 +873,47 @@ public class CargarPasajeros extends JPanel{
 		modeloAgregados.addRow(fila);
 		modeloAgregados.fireTableDataChanged();	
 	}
+	
+	private Boolean responsableSeleccionado() {
+		for(int i =0;i<tablaAgregados.getRowCount();i++) {
+			if((Boolean) modeloAgregados.getValueAt(i, 5)) return true;
+		}
+		
+		return false;
+	}
 
+	private Boolean responsablePeroNoOcupantes() {
+		if(tablaAgregados.getRowCount() == 1 && !responsableOcupaLugar.isSelected()) {
+			return true;
+		}
+		return false;
+	}
+
+	private void errorValidacionPasajeros(String mensaje,String textoBoton) {
+		MensajeError ventanaAux = new MensajeError(App.getVentana(),mensaje,textoBoton,"");
+		ventanaAux.getContentPane().remove(3);
+		
+		App.getVentana().setEnabled(false);
+		ventanaAux.pack();
+		ventanaAux.setLocationRelativeTo(App.getVentana());
+		ventanaAux.setVisible(true);
+		
+		ventanaAux.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+			}
+		});
+		
+		ActionListener listenerAceptar = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ventanaAux.dispose();
+				App.getVentana().setEnabled(true);
+				App.getVentana().setVisible(true);
+			}
+		 };
+		 
+		 ventanaAux.setListeners(listenerAceptar, null);
+	}
 }

@@ -323,6 +323,11 @@ public class AdministradorBDPasajero extends AdministradorBD {
         }
         catch(SQLException e) {
 			e.printStackTrace();
+			try {
+				conexion.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 			id = -1;
 		}
         finally {

@@ -9,6 +9,7 @@ import clases.HabitacionDobleEstandar;
 import clases.HabitacionDobleSuperior;
 import clases.HabitacionFamily;
 import clases.HabitacionIndividual;
+import clases.HabitacionSuite;
 import clases.dto.HabitacionDTO;
 import clases.dto.HabitacionDobleEstandarDTO;
 import clases.dto.HabitacionDobleSuperiorDTO;
@@ -88,6 +89,12 @@ public class GestorHabitaciones {
 			salida.add(dto);
 		}
 		
+		return salida;
+	}
+	
+	public Habitacion convertirDTO(HabitacionDTO h) {
+		AdministradorBDHabitaciones adminBD = new AdministradorBDHabitaciones();
+		Habitacion salida = adminBD.habitacionPorNro(h.getNro().get()); 
 		return salida;
 	}
 }

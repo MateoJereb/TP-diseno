@@ -150,4 +150,25 @@ public class GestorPasajeros {
 		return true;
 	}
 	
+	public Pasajero convertirDTO(PasajeroDTO p) {
+		TipoDocumento tipoDoc = new TipoDocumento();
+		tipoDoc.setTipo(p.getTipo().get());
+		
+		Pasajero salida = new Pasajero();
+		salida.setId(p.getId().get());
+		salida.setApellido(p.getApellido().get());
+		salida.setNombre(p.getNombre().get());
+		salida.setTipo_doc(tipoDoc);
+		salida.setNro_doc(p.getNro_doc().get());
+		
+		return salida;
+	}
+	
+	public List<Pasajero> convertirDTO(List<PasajeroDTO> pasajeros){
+		List<Pasajero> salida = new ArrayList<Pasajero>();
+		
+		for(PasajeroDTO p : pasajeros) salida.add(convertirDTO(p));
+		
+		return salida;
+	}
 }

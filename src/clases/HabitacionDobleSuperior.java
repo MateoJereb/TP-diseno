@@ -4,6 +4,10 @@ import enums.EstadoHabitacion;
 
 public class HabitacionDobleSuperior extends Habitacion {
 
+	public HabitacionDobleSuperior() {
+		
+	}
+	
 	public HabitacionDobleSuperior(Integer nro, Integer planta, Integer capacidad, Double costo_noche,
 			EstadoHabitacion estado_actual, Double descuento, Integer diasParaDescuento) {
 		super();
