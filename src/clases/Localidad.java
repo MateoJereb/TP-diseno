@@ -14,6 +14,10 @@ public class Localidad {
 		this.codigo_postal = codigo_postal;
 		this.provincia = provincia;
 	}
+	
+	public Localidad() {
+		
+	}
 
 	public Integer getId() {
 		return idLocalidad;
@@ -29,6 +33,22 @@ public class Localidad {
 
 	public Provincia getProvincia() {
 		return provincia;
+	}
+
+	public void setIdLocalidad(Integer idLocalidad) {
+		this.idLocalidad = idLocalidad;
+	}
+
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+
+	public void setCodigo_postal(String codigo_postal) {
+		this.codigo_postal = codigo_postal;
+	}
+
+	public void setProvincia(Provincia provincia) {
+		this.provincia = provincia;
 	}
 
 	@Override

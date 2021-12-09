@@ -205,10 +205,16 @@ public class MenuPrincipal extends JPanel{
 				App.ocuparHabitacion(Optional.ofNullable(null),Optional.ofNullable(null),Optional.ofNullable(null));
 			}
 		});
+		
+		generarFactura.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				App.generarFactura();
+			}
+		});
 	
 		reservarHabitacion.addActionListener(enDesarrollo);
 		cancelarReserva.addActionListener(enDesarrollo);		
-		generarFactura.addActionListener(enDesarrollo);	
 		ingresarPago.addActionListener(enDesarrollo);		
 		ingresarNotaCredito.addActionListener(enDesarrollo);		
 		gestionarListado.addActionListener(enDesarrollo);

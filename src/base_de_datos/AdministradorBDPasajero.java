@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -338,4 +339,81 @@ public class AdministradorBDPasajero extends AdministradorBD {
 		
 		return id;
 	}
+
+	public LocalDate fechaNacPorId(Integer id) {
+        LocalDate salida=null;
+
+        Connection conexion = getConnection();
+        PreparedStatement sentencia = null;
+        ResultSet resultado = null;
+
+        try {
+            sentencia = conexion.prepareStatement("SELECT fecha_nacimiento  FROM tp_12c.pasajero WHERE id_pasajero = "+id);
+            resultado = sentencia.executeQuery();
+
+            while(resultado.next()) {
+
+                String fecha=  resultado.getString(1);
+                salida = LocalDate.parse(fecha, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            }
+
+            System.out.println("Consulta realizada: "+sentencia.toString());
+        }
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if(resultado!=null) try { resultado.close();} catch(SQLException e) {e.printStackTrace();}
+            if(sentencia!=null) try { sentencia.close();} catch(SQLException e) {e.printStackTrace();}
+            if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
+        }
+
+        return salida;
+    }
+
+	public Pasajero buscarPasajero(Integer idPasajero) {
+        Pasajero salida = new Pasajero();
+        PosicionIVA posIva = new PosicionIVA();
+
+        Connection conexion = getConnection();
+        PreparedStatement sentencia = null;
+        ResultSet resultado = null;
+
+        String consulta ="SELECT pas.id_pasajero, pas.nro_doc, pas.nombre, pas.apellido, pi.id_posicion_iva, pi.posicion, pi.porcentaje, pi.tipo_factura\n"
+                + "FROM tp_12c.pasajero pas, tp_12c.posicion_iva pi\n"
+                + "WHERE pas.id_posicion_iva = pi.id_posicion_iva AND pas.id_pasajero = "+idPasajero;
+
+        try {
+            sentencia = conexion.prepareStatement(consulta);
+            resultado = sentencia.executeQuery();
+
+            while(resultado.next()) {
+                salida.setId(resultado.getInt(1));
+                salida.setNro_doc(resultado.getString(2));
+                salida.setNombre(resultado.getString(3));
+                salida.setApellido(resultado.getString(4));
+
+                posIva.setId(resultado.getInt(5));
+                posIva.setPosicion(resultado.getString(6));
+                posIva.setPorcentaje(resultado.getDouble(7));
+                if(resultado.getString(8).equals(TipoFactura.A.getName())) posIva.setTipo_factura(TipoFactura.A);
+                else posIva.setTipo_factura(TipoFactura.B);
+
+                salida.setPosicion_iva(posIva);
+
+
+            }
+            System.out.println("Consulta Realizada: "+consulta);
+        }catch(SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if(resultado!=null) try { resultado.close();} catch(SQLException e) {e.printStackTrace();}
+            if(sentencia!=null) try { sentencia.close();} catch(SQLException e) {e.printStackTrace();}
+            if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
+        }
+
+        return salida;
+    }
 }

@@ -19,8 +19,12 @@ import clases.HabitacionFamily;
 import clases.HabitacionIndividual;
 import clases.HabitacionSuite;
 import clases.Pasajero;
+import clases.PosicionIVA;
+import clases.TipoDocumento;
 import clases.dto.PasajeroDTO;
 import enums.EstadoHabitacion;
+import enums.TipoFactura;
+import excepciones.HabitacionInexistenteException;
 import excepciones.OcupanteEnOtraHabitacionException;
 
 public class AdministradorBDEstadias extends AdministradorBD {
@@ -227,5 +231,176 @@ public class AdministradorBDEstadias extends AdministradorBD {
 		if(he.isAfter(f) && hs.isAfter(f)) return false;
 		
 		return true;
+	}
+
+	public List<Pasajero> recuperarOcupantes(Integer nroHabitacion) throws HabitacionInexistenteException{
+		
+		List<Pasajero> salida = new ArrayList<Pasajero>();
+				
+				Connection conexion = getConnection();
+				PreparedStatement sentencia = null;
+				ResultSet resultado = null;
+				
+				String consulta = "SELECT * FROM 	tp_12c.habitacion where nro_habitacion =" +nroHabitacion;
+				
+				try {
+					sentencia = conexion.prepareStatement(consulta);
+					resultado = sentencia.executeQuery();
+					if(resultado.next() == false ) {
+						throw new  HabitacionInexistenteException("Habitacion Inexistente");
+					}
+					else System.out.println(consulta);
+					
+					}catch(SQLException e) {
+						e.printStackTrace();
+					}
+					
+				 consulta = "SELECT pas.id_pasajero, pas.apellido, pas.nombre, pas.nro_doc, td.id_tipo_documento, td.tipo, pi.posicion, pi.porcentaje, pi.tipo_factura\r\n"
+				 		+ "FROM tp_12c.estadia es , tp_12c.pasajero pas, tp_12c.hospeda_en he, tp_12c.tipo_documento td, tp_12c.posicion_iva pi\r\n"
+				 		+ "WHERE es.id_estadia = he.id_estadia and he.id_pasajero = pas.id_pasajero AND pas.id_tipo_documento =td.id_tipo_documento\r\n"
+				 		+ "AND es.nro_habitacion = "+nroHabitacion+" \r\n"
+				 		+ "AND es.pagado is FALSE	\r\n"
+				 		+ "AND pas.id_posicion_iva = pi.id_posicion_iva\r\n"
+				 		+ "GROUP BY pas.id_pasajero,es.hora_entrada, td.id_tipo_documento, pi.posicion, pi.porcentaje, pi.tipo_factura\r\n"
+				 		+ "HAVING es.hora_entrada <= ALL(SELECT es1.hora_entrada\r\n"
+				 		+ "		 								 from tp_12c.estadia es1\r\n"
+				 		+ "		 								 where es1.nro_habitacion= "+nroHabitacion+")";	
+				
+						consulta+=" ORDER BY 1";
+								
+								try {
+									sentencia = conexion.prepareStatement(consulta);
+									resultado = sentencia.executeQuery();
+									
+
+									while(resultado.next()) {
+										Pasajero pasajero = new Pasajero();
+										TipoDocumento tipoDoc = new TipoDocumento();
+										PosicionIVA posIva= new PosicionIVA();
+										
+										pasajero.setId(resultado.getInt(1));
+										pasajero.setApellido(resultado.getString(2));
+										pasajero.setNombre(resultado.getString(3));
+										pasajero.setNro_doc(resultado.getString(4));
+										
+										tipoDoc.setId(resultado.getInt(5));
+										tipoDoc.setTipo(resultado.getString(6));
+										
+										posIva.setPosicion(resultado.getString(7));
+										posIva.setPorcentaje(resultado.getDouble(8));
+										if(resultado.getString(9).equals("A")) posIva.setTipo_factura(TipoFactura.A);
+										else posIva.setTipo_factura(TipoFactura.B);
+
+										pasajero.setTipo_doc(tipoDoc);
+										pasajero.setPosicion_iva(posIva);
+										
+										salida.add(pasajero);
+										
+									}
+								System.out.println("Consulta realizada: "+consulta);
+			}
+			catch(SQLException e) {
+				e.printStackTrace();
+			}
+			finally {
+				if(resultado!=null) try { resultado.close();} catch(SQLException e) {e.printStackTrace();}
+				if(sentencia!=null) try { sentencia.close();} catch(SQLException e) {e.printStackTrace();}
+				if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
+			}
+			
+			return salida;
+		}
+
+	public Estadia recuperarEstadia(String nroHabitacion) {
+		
+		Estadia estadia = new Estadia();
+		Habitacion hab = new Habitacion();
+		Connection conexion = getConnection();
+		PreparedStatement sentencia = null;
+		ResultSet resultado = null;
+		
+		String consulta = "SELECT es.id_estadia, es.hora_entrada, es.hora_salida, es.monto, hab.costo_noche, hab.descuento, hab.dias_para_descuento\r\n"
+				+ "FROM tp_12c.estadia es, tp_12c.habitacion hab\r\n"
+				+ "WHERE es.nro_habitacion = hab.nro_habitacion \r\n"
+				+ "AND hab.nro_habitacion = "+nroHabitacion+"\r\n"
+				+ "GROUP BY es.id_estadia, es.hora_entrada, hab.costo_noche, hab.descuento, hab.dias_para_descuento\r\n"
+				+ "HAVING es.hora_entrada <= ALL(SELECT es1.hora_entrada\r\n"
+				+ "		 								 FROM tp_12c.estadia es1\r\n"
+				+ "		 								 WHERE es1.nro_habitacion= "+nroHabitacion+") ";
+		try {
+			sentencia = conexion.prepareStatement(consulta);
+			resultado = sentencia.executeQuery();
+			
+			while(resultado.next()) {
+				estadia.setId(resultado.getInt(1));
+				estadia.setHora_entrada(LocalDateTime.parse(resultado.getString(2), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+				estadia.setHora_salida(LocalDateTime.parse(resultado.getString(3), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+				estadia.setMonto(resultado.getDouble(4));
+				hab.setCosto_noche(resultado.getDouble(5));
+				hab.setDescuento(resultado.getDouble(6));
+				hab.setDiasParaDescuento(resultado.getInt(7));
+				
+				estadia.setHabitacion(hab);
+				
+			}
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}
+		return estadia;
+	}
+
+	public void actualizarMonto(Estadia estadia, Double costo) {
+		
+		Connection conexion = getConnection();
+		String update;
+        Statement sentencia = null;
+        ResultSet resultado = null;
+        update = "UPDATE tp_12c.estadia\r\n"
+        		+ "SET monto ="+costo+"\r\n"
+        		+ "where id_estadia = "+estadia.getId();
+        try {
+        	sentencia = conexion.createStatement();
+			conexion.setAutoCommit(false);
+			sentencia.executeUpdate(update);
+			conexion.commit();
+			conexion.setAutoCommit(true);
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+            if(resultado!=null) try { resultado.close();} catch(SQLException e) {e.printStackTrace();}
+            if(sentencia!=null) try { sentencia.close();} catch(SQLException e) {e.printStackTrace();}
+            if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
+        }
+        return;
+        
+	}
+
+	public Estadia buscarEstadia(Integer idEstadia) {
+		Estadia estadia = new Estadia();
+		
+		Connection conexion = getConnection();
+		PreparedStatement sentencia = null;
+		ResultSet resultado = null;
+		
+		String consulta = "SELECT es.id_estadia, es.hora_entrada, es.hora_salida, es.monto\r\n"
+				+ "FROM tp_12c.estadia es\r\n"
+				+ "WHERE es.id_estadia = "+idEstadia;
+		try {
+			sentencia = conexion.prepareStatement(consulta);
+			resultado = sentencia.executeQuery();
+			
+			while(resultado.next()) {
+				estadia.setId(resultado.getInt(1));
+				estadia.setHora_entrada(LocalDateTime.parse(resultado.getString(2), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+				estadia.setHora_salida(LocalDateTime.parse(resultado.getString(3), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+				estadia.setMonto(resultado.getDouble(4));
+				
+			}
+			}catch(SQLException e) {
+				e.printStackTrace();
+			}
+		return estadia;
 	}
 }

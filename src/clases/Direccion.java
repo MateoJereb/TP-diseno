@@ -35,6 +35,10 @@ public class Direccion {
 		if(dto.getDepartamento().isPresent()) departamento = dto.getDepartamento().get();
 	}
 
+	public Direccion() {
+		
+	}
+	
 	public Integer getId() {
 		return idDireccion;
 	}
@@ -69,6 +73,34 @@ public class Direccion {
 	
 	public void setLocalidad(Localidad localidad) {
 		this.localidad = localidad;
+	}
+
+	public void setIdDireccion(Integer idDireccion) {
+		this.idDireccion = idDireccion;
+	}
+
+	public void setCalle(String calle) {
+		this.calle = calle;
+	}
+
+	public void setNumero(String numero) {
+		this.numero = numero;
+	}
+
+	public void setPiso(Integer piso) {
+		this.piso = piso;
+	}
+
+	public void setDepartamento(String departamento) {
+		this.departamento = departamento;
+	}
+
+	public void setPasajero(Optional<Pasajero> pasajero) {
+		this.pasajero = pasajero;
+	}
+
+	public void setResponsable_pago(Optional<ResponsablePago> responsable_pago) {
+		this.responsable_pago = responsable_pago;
 	}
 
 	@Override

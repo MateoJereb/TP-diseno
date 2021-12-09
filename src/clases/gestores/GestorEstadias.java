@@ -3,19 +3,19 @@ package clases.gestores;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import base_de_datos.AdministradorBDEstadias;
-import clases.Estadia;
-import clases.Habitacion;
-import clases.Pasajero;
-import clases.dto.HabitacionDTO;
-import clases.dto.PasajeroDTO;
+import clases.*;
+import clases.dto.*;
 import enums.EstadoHabitacion;
+import excepciones.HabitacionInexistenteException;
 import excepciones.OcupanteEnOtraHabitacionException;
+import base_de_datos.AdministradorBDEstadias;
 
 public class GestorEstadias {
 
@@ -92,4 +92,87 @@ public class GestorEstadias {
 		AdministradorBDEstadias adminBD = new AdministradorBDEstadias();
 		adminBD.registrarEstadia(estadia);
 	}
+
+	public List<PasajeroDTO> buscarOcupantes (Integer nroHab)throws HabitacionInexistenteException{
+		List<PasajeroDTO> salida = new ArrayList<PasajeroDTO>();
+		AdministradorBDEstadias adminBD = new AdministradorBDEstadias();
+		List<Pasajero> pasajeros= new ArrayList<Pasajero>();
+			pasajeros =  adminBD.recuperarOcupantes(nroHab);
+			salida = instancia.generarDTOPasajeros(pasajeros);
+		
+			
+		return salida;
+	}
+	
+	public List<PasajeroDTO> generarDTOPasajeros(List<Pasajero> pasajeros){
+		List<PasajeroDTO> salida = new ArrayList<PasajeroDTO>();
+		
+		for(Pasajero p : pasajeros) {
+			PasajeroDTO dto = new PasajeroDTO();
+			
+			dto.setId(p.getId());
+			dto.setApellido(p.getApellido());
+			dto.setNombre(p.getNombre());
+			dto.setIdTipoDoc(p.getTipo_doc().getId());
+			dto.setTipo(p.getTipo_doc().getTipo());
+			dto.setNro_doc(p.getNro_doc());
+			dto.setPorcentaje(p.getPosicion_iva().getPorcentaje());
+			dto.setTipoFactura(p.getPosicion_iva().getTipoFactura());
+			dto.setPosicion(p.getPosicion_iva().getPosicion());
+			
+			
+			salida.add(dto);
+			
+		}
+		
+		return salida;
+	
+	}
+	public EstadiaDTO calcularCosto(String nroHabitacion,String horaSalida) {
+		
+		AdministradorBDEstadias adminBd = new AdministradorBDEstadias();
+		Estadia estadia = null;
+		estadia = adminBd.recuperarEstadia(nroHabitacion);
+				
+		Integer cantDias = calcularCantDias(estadia);
+		Double costo = cantDias *estadia.getHabitacion().getCosto_noche();
+		
+		if(estadia.getHora_salida().getHour()>11 && (estadia.getHora_entrada().getHour() <18 || (estadia.getHora_entrada().getHour()==18 && estadia.getHora_salida().getMinute()==0))) costo+= ((estadia.getHabitacion().getCosto_noche())/2);
+		else {
+			if (estadia.getHora_salida().getHour() >18 || (estadia.getHora_salida().getHour() == 18 && estadia.getHora_salida().getMinute()> 0)) 
+				costo += estadia.getHabitacion().getCosto_noche();
+		}
+		
+		if(cantDias >= estadia.getHabitacion().getDiasParaDescuento()) costo*=(1-estadia.getHabitacion().getDescuento());
+		estadia.setMonto(costo);
+		adminBd.actualizarMonto(estadia, costo);
+		return generarDTO(estadia);
+	}
+	private Integer calcularCantDias(Estadia est){
+		
+		long diff =ChronoUnit.DAYS.between(est.getHora_entrada(), est.getHora_salida());
+		Integer cantDias = Math.toIntExact(diff);
+		return cantDias;
+	}
+	private EstadiaDTO generarDTO(Estadia est) {
+		EstadiaDTO salida = new EstadiaDTO();
+		HabitacionDTO hab = new HabitacionDTO();
+		hab.setCosto_noche(est.getHabitacion().getCosto_noche());
+		hab.setDescuento(est.getHabitacion().getDescuento());
+		hab.setDiasParaDescuento(est.getHabitacion().getDiasParaDescuento());
+		
+		salida.setId(est.getId());
+		salida.setHora_entrada(est.getHora_entrada());
+		salida.setHora_salida(est.getHora_salida());
+		salida.setMonto(est.getMonto());
+		salida.setHabitacion(hab);
+		return salida;
+		
+	}
+	public  Estadia buscarEstadia(EstadiaDTO estDTO) {
+		AdministradorBDEstadias admin = new AdministradorBDEstadias();
+		return admin.buscarEstadia(estDTO.getId().get());
+	}
+	
+	
 }

@@ -1,5 +1,7 @@
 package clases.gestores;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -170,5 +172,25 @@ public class GestorPasajeros {
 		for(PasajeroDTO p : pasajeros) salida.add(convertirDTO(p));
 		
 		return salida;
+	}
+
+	public Boolean esMayor(Integer idPasajero) {
+		PasajeroDTO pasDto= new PasajeroDTO();
+		pasDto.setId(idPasajero);
+		AdministradorBDPasajero adminBD  = new AdministradorBDPasajero();
+		LocalDate pas = adminBD.fechaNacPorId(idPasajero);
+		
+		
+		 LocalDate hoy = LocalDate.now();
+
+	        long diff = ChronoUnit.DAYS.between(pas, hoy);
+	       return ((diff / 365 )>=18);
+		
+	}
+	
+	public Pasajero buscarPasajero(PasajeroDTO  pas) {
+		AdministradorBDPasajero admin= new AdministradorBDPasajero();
+		return admin.buscarPasajero(pas.getId().get());
+		
 	}
 }

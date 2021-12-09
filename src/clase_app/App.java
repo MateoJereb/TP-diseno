@@ -97,5 +97,13 @@ public class App {
 		ventana.revalidate();
 		ventana.repaint();
 	}
+	
+	public static void generarFactura() {
+		GenerarFactura panel = new GenerarFactura();
+		ventana.setContentPane(panel);
+		ventana.setTitle("Hotel Premier - Gestionar Pasajeros");
+		ventana.revalidate();
+		ventana.repaint();
+	}
 
 }

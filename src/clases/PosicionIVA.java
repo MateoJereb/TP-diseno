@@ -9,6 +9,10 @@ public class PosicionIVA {
 	private Double porcentaje;
 	private TipoFactura tipo_factura;
 	
+	public PosicionIVA() {
+		
+	}
+	
 	public PosicionIVA(Integer id, String posicion, Double porcentaje, TipoFactura tipo_factura) {
 		this.id = id;
 		this.posicion = posicion;
@@ -25,6 +29,19 @@ public class PosicionIVA {
 	}
 	public TipoFactura getTipoFactura() {
 		return tipo_factura;
+	}
+	
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public void setPosicion(String posicion) {
+		this.posicion = posicion;
+	}
+	public void setPorcentaje(Double porcentaje) {
+		this.porcentaje = porcentaje;
+	}
+	public void setTipo_factura(TipoFactura tipo_factura) {
+		this.tipo_factura = tipo_factura;
 	}
 	@Override
 	public int hashCode() {

@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import enums.EstadoHabitacion;
 
-public abstract class HabitacionDTO {
+public class HabitacionDTO {
 	protected Optional<Integer> nro;
 	protected Optional<Integer> planta;
 	protected Optional<Integer> capacidad;
@@ -78,7 +78,4 @@ public abstract class HabitacionDTO {
 	public void setAOcupar(Boolean aOcupar) {
 		this.aOcupar = aOcupar;
 	}
-	
-	public abstract String toString();
-	
 }

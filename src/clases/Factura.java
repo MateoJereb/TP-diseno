@@ -9,6 +9,14 @@ import enums.TipoFactura;
 
 public class Factura {
 
+	public List<ConsumoFacturado> getConsumos() {
+		return consumos;
+	}
+
+	public void setConsumos(List<ConsumoFacturado> consumos) {
+		this.consumos = consumos;
+	}
+
 	private Integer id;
 	private TipoFactura tipo;
 	private LocalDateTime fecha;
@@ -86,16 +94,16 @@ public class Factura {
 		return responsable_fisico;
 	}
 
-	public void setResponsable_fisico(Optional<Pasajero> responsable_fisico) {
-		this.responsable_fisico = responsable_fisico;
+	public void setResponsable_fisico(Pasajero responsable_fisico) {
+		this.responsable_fisico = Optional.of(responsable_fisico);
 	}
 
 	public Optional<ResponsablePago> getResponsable_juridico() {
 		return responsable_juridico;
 	}
 
-	public void setResponsable_juridico(Optional<ResponsablePago> responsable_juridico) {
-		this.responsable_juridico = responsable_juridico;
+	public void setResponsable_juridico(ResponsablePago responsable_juridico) {
+		this.responsable_juridico = Optional.of(responsable_juridico);
 	}
 
 	public Estadia getEstadia() {
@@ -104,6 +112,13 @@ public class Factura {
 
 	public void setEstadia(Estadia estadia) {
 		this.estadia = estadia;
+	}
+	
+	public void setResponsable_juridicoNull() {
+		this.responsable_juridico.ofNullable(null);
+	}
+	public void setResponsable_fisicoNull() {
+		this.responsable_fisico.ofNullable(null);
 	}
 	
 	

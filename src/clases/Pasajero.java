@@ -130,7 +130,38 @@ public class Pasajero {
 	public void setPosicion_iva(PosicionIVA posicion_iva) {
 		this.posicion_iva = posicion_iva;
 	}
-	
+
+	public void setCuit(String cuit) {
+		this.cuit = cuit;
+	}
+
+	public void setFecha_nacimiento(LocalDate fecha_nacimiento) {
+		this.fecha_nacimiento = fecha_nacimiento;
+	}
+
+	public void setTelefono(String telefono) {
+		this.telefono = telefono;
+	}
+
+	public void setMail(String mail) {
+		this.mail = mail;
+	}
+
+	public void setNacionalidad(String nacionalidad) {
+		this.nacionalidad = nacionalidad;
+	}
+
+	public void setFacturas(List<Factura> facturas) {
+		this.facturas = facturas;
+	}
+
+	public void setEstadias(List<Estadia> estadias) {
+		this.estadias = estadias;
+	}
+
+	public void setResponsable_de(List<Estadia> responsable_de) {
+		this.responsable_de = responsable_de;
+	}
 
 	@Override
 	public int hashCode() {

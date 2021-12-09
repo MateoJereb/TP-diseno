@@ -26,7 +26,7 @@ public class AdministradorBDUbicaciones extends AdministradorBD{
 		ResultSet resultado = null;
 		
 		try {
-			sentencia = conexion.prepareStatement("SELECT * FROM tp_12c.pais");
+			sentencia = conexion.prepareStatement("SELECT * FROM tp_12c.pais ORDER BY nombre");
 			resultado = sentencia.executeQuery();
 			
 			while(resultado.next()) {
@@ -58,7 +58,8 @@ public class AdministradorBDUbicaciones extends AdministradorBD{
 		
 		try {
 			sentencia = conexion.prepareStatement("SELECT * FROM tp_12c.pais pa, tp_12c.provincia pr"
-					+ " WHERE pa.id_pais = "+paisFiltro+" AND pa.id_pais = pr.id_pais");
+							+ " WHERE pa.id_pais = "+paisFiltro+" AND pa.id_pais = pr.id_pais"
+							+ " ORDER BY pr.nombre");
 			resultado = sentencia.executeQuery();
 			
 			while(resultado.next()) {
@@ -97,7 +98,8 @@ public class AdministradorBDUbicaciones extends AdministradorBD{
 		try {
 			sentencia = conexion.prepareStatement("SELECT * FROM tp_12c.pais pa, tp_12c.provincia pr, tp_12c.localidad lo"
 					+ " WHERE pr.id_provincia = "+provFiltro
-					+ " AND pa.id_pais = pr.id_pais AND pr.id_provincia = lo.id_provincia");
+					+ " AND pa.id_pais = pr.id_pais AND pr.id_provincia = lo.id_provincia"
+					+ " ORDER BY lo.nombre");
 			resultado = sentencia.executeQuery();
 			
 			while(resultado.next()) {

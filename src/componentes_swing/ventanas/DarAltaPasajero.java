@@ -502,7 +502,7 @@ public class DarAltaPasajero extends JPanel {
 		cons.fill = GridBagConstraints.NONE;
 		cons.anchor = GridBagConstraints.EAST;
 		cons.insets = new Insets(10,20,10,5);
-		panelDirec.add(eCodPostal, cons);
+		panelDirec.add(ePais, cons);
 		cons.gridx=1;
 		cons.insets = new Insets(0,0,0,0);
 		EtiquetaJ asterisco12 = new EtiquetaJ("(*)");
@@ -513,7 +513,7 @@ public class DarAltaPasajero extends JPanel {
 		cons.anchor = GridBagConstraints.CENTER;
 		cons.weightx = 0.15;
 		cons.fill = GridBagConstraints.HORIZONTAL;
-		panelDirec.add(cCodPostal,cons);
+		panelDirec.add(lPais,cons);
 		
 		cons.gridy=5;
 		cons.gridx = 0;
@@ -521,7 +521,7 @@ public class DarAltaPasajero extends JPanel {
 		cons.fill = GridBagConstraints.NONE;
 		cons.anchor = GridBagConstraints.EAST;
 		cons.insets = new Insets(10,20,10,5);
-		panelDirec.add(ePais, cons);
+		panelDirec.add(eProvincia, cons);
 		cons.gridx=1;
 		cons.insets = new Insets(0,0,0,0);
 		EtiquetaJ asterisco13 = new EtiquetaJ("(*)");
@@ -532,7 +532,7 @@ public class DarAltaPasajero extends JPanel {
 		cons.anchor = GridBagConstraints.CENTER;
 		cons.weightx = 0.15;
 		cons.fill = GridBagConstraints.HORIZONTAL;
-		panelDirec.add(lPais,cons);
+		panelDirec.add(lProvincia,cons);
 		
 		cons.gridy=6;
 		cons.gridx = 0;
@@ -540,7 +540,7 @@ public class DarAltaPasajero extends JPanel {
 		cons.fill = GridBagConstraints.NONE;
 		cons.anchor = GridBagConstraints.EAST;
 		cons.insets = new Insets(10,20,10,5);
-		panelDirec.add(eProvincia, cons);
+		panelDirec.add(eLocalidad, cons);
 		cons.gridx=1;
 		cons.insets = new Insets(0,0,0,0);
 		EtiquetaJ asterisco14 = new EtiquetaJ("(*)");
@@ -551,7 +551,7 @@ public class DarAltaPasajero extends JPanel {
 		cons.anchor = GridBagConstraints.CENTER;
 		cons.weightx = 0.15;
 		cons.fill = GridBagConstraints.HORIZONTAL;
-		panelDirec.add(lProvincia,cons);
+		panelDirec.add(lLocalidad,cons);
 		
 		cons.gridy=7;
 		cons.gridx = 0;
@@ -559,7 +559,7 @@ public class DarAltaPasajero extends JPanel {
 		cons.fill = GridBagConstraints.NONE;
 		cons.anchor = GridBagConstraints.EAST;
 		cons.insets = new Insets(10,20,10,5);
-		panelDirec.add(eLocalidad, cons);
+		panelDirec.add(eCodPostal, cons);
 		cons.gridx=1;
 		cons.insets = new Insets(0,0,0,0);
 		EtiquetaJ asterisco15 = new EtiquetaJ("(*)");
@@ -570,7 +570,8 @@ public class DarAltaPasajero extends JPanel {
 		cons.anchor = GridBagConstraints.CENTER;
 		cons.weightx = 0.15;
 		cons.fill = GridBagConstraints.HORIZONTAL;
-		panelDirec.add(lLocalidad,cons);
+		cCodPostal.setEditable(false);
+		panelDirec.add(cCodPostal,cons);
 		
 		JPanel panelBotones = new JPanel();
 		panelBotones.setLayout(new GridBagLayout());
@@ -693,6 +694,16 @@ public class DarAltaPasajero extends JPanel {
 					else {
 						lLocalidad.setLocalidades(((ProvinciaDTO)lProvincia.getSelectedItem()).getIdProv());
 					}
+				}
+			}
+		});
+		
+		lLocalidad.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					if(((LocalidadDTO) lLocalidad.getSelectedItem()).getIdLocalidad() == -1) cCodPostal.setText("");
+					else cCodPostal.setText(((LocalidadDTO) lLocalidad.getSelectedItem()).getCodigo_postal());
 				}
 			}
 		});

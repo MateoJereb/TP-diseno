@@ -3,6 +3,8 @@ package clases.dto;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import enums.TipoFactura;
+
 public class PasajeroDTO {
 
 	//Pasajero
@@ -45,6 +47,7 @@ public class PasajeroDTO {
 	private Optional<Integer> idPosIva = Optional.ofNullable(null);
 	private Optional<String> posicion = Optional.ofNullable(null);
 	private Optional<Double> porcentaje = Optional.ofNullable(null);
+	private Optional<TipoFactura> tipoFactura = Optional.ofNullable(null);
 	
 	public PasajeroDTO() {
 		super();
@@ -266,6 +269,14 @@ public class PasajeroDTO {
 		this.porcentaje = Optional.of(porcentaje);
 	}
 
+	public Optional<TipoFactura> getTipoFactura() {
+        return tipoFactura;
+    }
+
+    public void setTipoFactura(TipoFactura tipoFactura) {
+        this.tipoFactura = Optional.of(tipoFactura);
+    }
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

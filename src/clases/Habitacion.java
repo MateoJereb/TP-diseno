@@ -4,7 +4,7 @@ import java.util.List;
 
 import enums.EstadoHabitacion;
 
-public abstract class Habitacion {
+public class Habitacion {
 
 	protected Integer nro;
 	protected Integer planta;
