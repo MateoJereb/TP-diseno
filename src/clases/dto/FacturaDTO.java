@@ -23,8 +23,8 @@ public class FacturaDTO {
 	private Optional<EstadoFactura> estado = Optional.ofNullable(null);
 	private Optional<PasajeroDTO> responsable_fisico = Optional.ofNullable(null);
 	private Optional<ResponsablePagoDTO> responsable_juridico = Optional.ofNullable(null);
-	private Optional<Estadia> estadia = Optional.ofNullable(null);
-	private Optional<ConsumoFacturadoDTO> consumos = Optional.ofNullable(null);
+	private Optional<EstadiaDTO> estadia = Optional.ofNullable(null);
+	private Optional<List<ConsumoFacturadoDTO>> consumos = Optional.ofNullable(null);
 	public Optional<Integer> getId_factura() {
 		return id_factura;
 	}
@@ -79,18 +79,19 @@ public class FacturaDTO {
 	public void setResponsable_juridico(ResponsablePagoDTO responsable_juridico) {
 		this.responsable_juridico = Optional.of(responsable_juridico);
 	}
-	public Optional<Estadia> getEstadia() {
+	public Optional<EstadiaDTO> getEstadia() {
 		return estadia;
 	}
-	public void setEstadia(Estadia estadia) {
+	public void setEstadia(EstadiaDTO estadia) {
 		this.estadia = Optional.of(estadia);
 	}
-	public Optional<ConsumoFacturadoDTO> getConsumos() {
+	public Optional<List<ConsumoFacturadoDTO>> getConsumos() {
 		return consumos;
 	}
-	public void setConsumos(ConsumoFacturadoDTO consumos) {
+	public void setConsumos(List<ConsumoFacturadoDTO> consumos) {
 		this.consumos = Optional.of(consumos);
 	}
+	
 
 	
 	

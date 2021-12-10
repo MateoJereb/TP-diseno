@@ -125,9 +125,12 @@ public class GestorFacturas {
 		pasajero.setNombreLocalidad(factura.getResponsable_fisico().get().getDireccion().getLocalidad().getNombre());
 		pasajero.setCodigo_postal(factura.getResponsable_fisico().get().getDireccion().getLocalidad().getCodigo_postal());
 		pasajero.setCalle(factura.getResponsable_fisico().get().getDireccion().getCalle());
+		pasajero.setDepartamento(factura.getResponsable_fisico().get().getDireccion().getDepartamento());
+		pasajero.setPiso(factura.getResponsable_fisico().get().getDireccion().getPiso());
 		pasajero.setNumero(factura.getResponsable_fisico().get().getDireccion().getNumero());
 		estadia.setHora_entrada(factura.getEstadia().getHora_entrada());
 		estadia.setHora_salida(factura.getEstadia().getHora_salida());
+		estadia.setMonto(factura.getEstadia().getMonto());
 		
 		if(factura.getEstadia().getHabitacion().getClass() == HabitacionIndividual.class) habitacion = new HabitacionIndividualDTO();
 		if(factura.getEstadia().getHabitacion().getClass() == HabitacionDobleEstandar.class) habitacion = new HabitacionDobleEstandarDTO();
@@ -150,6 +153,14 @@ public class GestorFacturas {
 			consumosFacturadosDTO.add(consFactDTO);
 			
 		}
+		
+		estadia.setHabitacion(habitacion);
+		
+		salida.setResponsable_fisico(pasajero);
+		salida.setEstadia(estadia);
+		salida.setConsumos(consumosFacturadosDTO);
+		
+		
 		return salida;
 
 	}
@@ -167,13 +178,16 @@ public class GestorFacturas {
 		salida.setIva(factura.getIva());
 		salida.setMonto_total(factura.getMonto_total());
 		responsable.setRazon_social(factura.getResponsable_juridico().get().getRazon_social());
-		responsable.setTelefono(factura.getResponsable_fisico().get().getTelefono());
+		responsable.setTelefono(factura.getResponsable_juridico().get().getTelefono());
 		responsable.setNombreLocalidad(factura.getResponsable_juridico().get().getDireccion().getLocalidad().getNombre());
 		responsable.setCodigo_postal(factura.getResponsable_juridico().get().getDireccion().getLocalidad().getCodigo_postal());
-		responsable.setCalle(factura.getResponsable_fisico().get().getDireccion().getCalle());
-		responsable.setNumero(factura.getResponsable_fisico().get().getDireccion().getNumero());
+		responsable.setCalle(factura.getResponsable_juridico().get().getDireccion().getCalle());
+		responsable.setDepartamento(factura.getResponsable_juridico().get().getDireccion().getDepartamento());
+		responsable.setPiso(factura.getResponsable_juridico().get().getDireccion().getPiso());
+		responsable.setNumero(factura.getResponsable_juridico().get().getDireccion().getNumero());
 		estadia.setHora_entrada(factura.getEstadia().getHora_entrada());
 		estadia.setHora_salida(factura.getEstadia().getHora_salida());
+		estadia.setMonto(factura.getEstadia().getMonto());
 		
 		if(factura.getEstadia().getHabitacion().getClass() == HabitacionIndividual.class) habitacion = new HabitacionIndividualDTO();
 		if(factura.getEstadia().getHabitacion().getClass() == HabitacionDobleEstandar.class) habitacion = new HabitacionDobleEstandarDTO();
@@ -194,6 +208,13 @@ public class GestorFacturas {
 			consumosFacturadosDTO.add(consFactDTO);
 			
 		}
+		
+		estadia.setHabitacion(habitacion);
+		
+		salida.setResponsable_juridico(responsable);
+		salida.setEstadia(estadia);
+		salida.setConsumos(consumosFacturadosDTO);
+		
 		return salida;
 
 	}

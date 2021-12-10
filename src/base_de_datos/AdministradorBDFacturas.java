@@ -128,7 +128,7 @@ public class AdministradorBDFacturas extends AdministradorBD{
 		Connection conexion = getConnection();
         Statement sentencia = null;
         ResultSet resultado = null;
-        String consulta = "SELECT fac.id_factura, fac.fecha, fac.tipo, fac.monto_neto, fac.monto_total, fac.iva, rp.razon_social, rp.telefono, dir.calle, dir.numero, loc.nombre, loc.codigo_postal, es.hora_entrada, es.hora_salida, hab.nro_habitacion, hab.tipo, cons.descripcion, cons.monto, fc.cantidad\r\n"
+        String consulta = "SELECT fac.id_factura, fac.fecha, fac.tipo, fac.monto_neto, fac.monto_total, fac.iva, rp.razon_social, rp.telefono, dir.calle, dir.numero, loc.nombre, loc.codigo_postal, es.hora_entrada, es.hora_salida, hab.nro_habitacion, hab.tipo, cons.descripcion, cons.monto, fc.cantidad, dir.departamento, dir.piso, es.monto\r\n"
         		+ "FROM tp_12c.estadia es,tp_12c.responsable_pago rp, tp_12c.factura fac, tp_12c.habitacion hab, tp_12c.consumo cons, tp_12c.direccion dir, tp_12c.localidad loc,  tp_12c.factura_consumo fc\r\n"
         		+ "WHERE fac.id_factura = fc.id_factura and cons.id_consumo = fc.id_consumo\r\n"
         		+ "AND fac.id_estadia = es.id_estadia\r\n"
@@ -166,10 +166,13 @@ public class AdministradorBDFacturas extends AdministradorBD{
             		responsable.setTelefono(resultado.getString(8));
             		direccion.setCalle(resultado.getString(9));
             		direccion.setNumero(resultado.getString(10));
+            		direccion.setDepartamento(resultado.getString(21));
+            		direccion.setPiso(resultado.getInt(22));
             		localidad.setNombre(resultado.getString(11));
             		localidad.setCodigo_postal(resultado.getString(12));
             		estadia.setHora_entrada(LocalDateTime.parse(resultado.getString(13), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             		estadia.setHora_salida(LocalDateTime.parse(resultado.getString(14), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            		estadia.setMonto(resultado.getDouble(23));
             		String TipoHabitacion = resultado.getString(16);
             		
             		if(TipoHabitacion.equals("I")) {
@@ -238,7 +241,7 @@ public class AdministradorBDFacturas extends AdministradorBD{
 		Connection conexion = getConnection();
         Statement sentencia = null;
         ResultSet resultado = null;
-        String consulta = "SELECT fac.id_factura, fac.fecha, fac.tipo, fac.monto_neto, fac.monto_total, fac.iva, pas.nombre, pas.apellido, pas.telefono, dir.calle, dir.numero, loc.nombre, loc.codigo_postal, es.hora_entrada, es.hora_salida, hab.nro_habitacion, hab.tipo, cons.descripcion, cons.monto, fc.cantidad, pi.posicion\r\n"
+        String consulta = "SELECT fac.id_factura, fac.fecha, fac.tipo, fac.monto_neto, fac.monto_total, fac.iva, pas.nombre, pas.apellido, pas.telefono, dir.calle, dir.numero, loc.nombre, loc.codigo_postal, es.hora_entrada, es.hora_salida, hab.nro_habitacion, hab.tipo, cons.descripcion, cons.monto, fc.cantidad, pi.posicion, dir.departamento, dir.piso, es.monto\r\n"
         		+ "FROM tp_12c.estadia es,tp_12c.pasajero pas, tp_12c.factura fac, tp_12c.habitacion hab, tp_12c.consumo cons, tp_12c.direccion dir, tp_12c.localidad loc, tp_12c.posicion_iva pi, tp_12c.factura_consumo fc\r\n"
         		+ "WHERE fac.id_factura = fc.id_factura and cons.id_consumo = fc.id_consumo\r\n"
         		+ "AND fac.id_estadia = es.id_estadia\r\n"
@@ -279,10 +282,13 @@ public class AdministradorBDFacturas extends AdministradorBD{
             		pasajero.setTelefono(resultado.getString(9));
             		direccion.setCalle(resultado.getString(10));
             		direccion.setNumero(resultado.getString(11));
+            		direccion.setDepartamento(resultado.getString(22));
+            		direccion.setPiso(resultado.getInt(23));
             		localidad.setNombre(resultado.getString(12));
             		localidad.setCodigo_postal(resultado.getString(13));
             		estadia.setHora_entrada(LocalDateTime.parse(resultado.getString(14), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             		estadia.setHora_salida(LocalDateTime.parse(resultado.getString(15), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            		estadia.setMonto(resultado.getDouble(24));
             		String TipoHabitacion = resultado.getString(17);
             		
             		if(TipoHabitacion.equals("I")) {

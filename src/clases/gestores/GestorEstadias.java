@@ -15,7 +15,6 @@ import clases.dto.*;
 import enums.EstadoHabitacion;
 import excepciones.HabitacionInexistenteException;
 import excepciones.OcupanteEnOtraHabitacionException;
-import base_de_datos.AdministradorBDEstadias;
 
 public class GestorEstadias {
 
@@ -150,7 +149,7 @@ public class GestorEstadias {
 	}
 	private Integer calcularCantDias(Estadia est){
 		
-		long diff =ChronoUnit.DAYS.between(est.getHora_entrada(), est.getHora_salida());
+		long diff =ChronoUnit.DAYS.between(est.getHora_entrada().toLocalDate(), est.getHora_salida().toLocalDate());
 		Integer cantDias = Math.toIntExact(diff);
 		return cantDias;
 	}

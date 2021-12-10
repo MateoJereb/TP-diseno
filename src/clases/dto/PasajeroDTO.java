@@ -214,11 +214,11 @@ public class PasajeroDTO {
 	}
 
 	public void setDepartamento(String departamento) {
-		this.departamento = Optional.of(departamento);
+		if(departamento!= null ) this.departamento = Optional.of(departamento);
 	}
 
 	public void setPiso(Integer piso) {
-		this.piso = Optional.of(piso);
+		if(piso!= null) this.piso = Optional.of(piso);
 	}
 
 	public void setIdLocalidad(Integer idLocalidad) {

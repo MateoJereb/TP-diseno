@@ -11,7 +11,6 @@ public class ResponsablePagoDTO {
 	private Optional<String> razon_social = Optional.ofNullable(null);
 	private Optional<String> cuit = Optional.ofNullable(null);
 	private Optional<String> telefono = Optional.ofNullable(null);
-	private Optional<Direccion> direccion = Optional.ofNullable(null);
 	private Optional<List<FacturaDTO>> facturas = Optional.ofNullable(null);
 	
 	//Direccion
@@ -57,13 +56,13 @@ public class ResponsablePagoDTO {
 			return departamento;
 		}
 		public void setDepartamento(String departamento) {
-			this.departamento = Optional.of(departamento);
+			if(departamento != null) this.departamento = Optional.of(departamento);
 		}
 		public Optional<Integer> getPiso() {
 			return piso;
 		}
 		public void setPiso(Integer piso) {
-			this.piso = Optional.of(piso);
+			if(piso != null) this.piso = Optional.of(piso);
 		}
 		public Optional<Integer> getIdLocalidad() {
 			return idLocalidad;
@@ -124,12 +123,6 @@ public class ResponsablePagoDTO {
 	}
 	public void setTelefono(String telefono) {
 		this.telefono = Optional.of(telefono);
-	}
-	public Optional<Direccion> getDireccion() {
-		return direccion;
-	}
-	public void setDireccion(Direccion direccion) {
-		this.direccion = Optional.of(direccion);
 	}
 	public Optional<List<FacturaDTO>> getFacturas() {
 		return facturas;

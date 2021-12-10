@@ -39,6 +39,8 @@ import componentes_swing.EtiquetaJ;
 import componentes_swing.retroalimentacion.MensajeConfirmacion;
 import componentes_swing.retroalimentacion.MensajeError;
 import componentes_swing.retroalimentacion.MensajeInformativo;
+import enums.TipoFactura;
+import facturas.*;
 
 public class RealizarFactura extends JPanel{
 
@@ -231,76 +233,56 @@ public class RealizarFactura extends JPanel{
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				GestorFacturas gestor = GestorFacturas.getInstance();
-				Integer idEstadia = gestor.facturar(responsable, estadiaAFacturar, consumos);
+				Integer idFactura = gestor.facturar(responsable, estadiaAFacturar, consumos);
 				if(montoNoNulo()) {
-				if(idEstadia==-1) {
-					//Si la factura no se puede crear, se retorna un id negativo y se muestra el mensaje de Error correspondiente
-					String mensaje ="<html><body>No se pudo generar la factura correctamente<br>Intente nuevamente</body></html>";
-					MensajeError error = new MensajeError(App.getVentana(),mensaje, "Aceptar", "");
-					error.getContentPane().remove(3);
+					if(idFactura==-1) {
+						//Si la factura no se puede crear, se retorna un id negativo y se muestra el mensaje de Error correspondiente
+						String mensaje ="<html><body>No se pudo generar la factura correctamente<br>Intente nuevamente</body></html>";
+						MensajeError error = new MensajeError(App.getVentana(),mensaje, "Aceptar", "");
+						error.getContentPane().remove(3);
 					
-					App.getVentana().setEnabled(false);
-					error.pack();
-					error.setLocationRelativeTo(App.getVentana());
-					error.setVisible(true); 
+						App.getVentana().setEnabled(false);
+						error.pack();
+						error.setLocationRelativeTo(App.getVentana());
+						error.setVisible(true); 
 					
-					error.addWindowListener(new WindowAdapter() {
-						public void windowClosing(WindowEvent e) {
-							App.getVentana().setEnabled(true);
-							App.getVentana().setVisible(true);
-						}	
-					});
-					ActionListener listenerAceptar = new ActionListener() {
-
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							// TODO Auto-generated method stub
-							error.dispose();
-							App.getVentana().setEnabled(true);
-							App.getVentana().setVisible(true);
+						error.addWindowListener(new WindowAdapter() {
+							public void windowClosing(WindowEvent e) {
+								App.getVentana().setEnabled(true);
+								App.getVentana().setVisible(true);
+							}	
+						});
+						ActionListener listenerAceptar = new ActionListener() {
 							
-						}
-						
-					};
-					error.setListeners(listenerAceptar, null);
-				}
-				else {
-					//if(responsable.getClass == PasajeroDTO.class) imprimirFacturaRespFisico(gestor.recuperarFacturaRespFisico(idEstadia));
-					//else imprimirFacturaRespJuridico(gestor.recuperarFacturaRespJuridico(idEstadia);
-					
-					
-					//Mostrar mensaje factura creada con exito.
-					/*String mensaje ="<html><body>La factura ha sido creada con éxito</body></html>";
-					MensajeInformativo info = new MensajeInformativo(App.getVentana(),mensaje, "Aceptar", "");
-					info.getContentPane().remove(3);
-					
-					App.getVentana().setEnabled(false);
-					info.pack();
-					info.setLocationRelativeTo(App.getVentana());
-					info.setVisible(true); 
-					
-					info.addWindowListener(new WindowAdapter() {
-						public void windowClosing(WindowEvent e) {
-							App.getVentana().setEnabled(true);
-							App.getVentana().setVisible(true);
-						}	
-					});
-					ActionListener listenerAceptar = new ActionListener() {
-
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							// TODO Auto-generated method stub
-							info.dispose();
-							ventana.dispose();
-							App.getVentana().setEnabled(true);
-							App.getVentana().setVisible(true);
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								error.dispose();
+								App.getVentana().setEnabled(true);
+								App.getVentana().setVisible(true);
+								
+							}
 							
-						}
+						};
+						error.setListeners(listenerAceptar, null);
+					}
+					else {
+						ventana.dispose();
 						
-					};
-					info.setListeners(listenerAceptar, null);*/
-				}
-				
+						FacturaDTO facturaDTO = null;
+						JPanel panelFactura = null;
+						
+						if(responsable.getClass() == PasajeroDTO.class) facturaDTO = gestor.recuperarFacturaRespFisico(idFactura);
+						else facturaDTO = gestor.recuperarFacturaRespJuridico(idFactura);
+						
+						if(facturaDTO.getTipo().get() == TipoFactura.A) panelFactura = new FacturaA(facturaDTO,checkEstadia.isSelected());
+						else panelFactura = new FacturaB(facturaDTO,checkEstadia.isSelected());
+							
+						FacturaImpresion ventanaImpresion = new FacturaImpresion(App.getVentana(), panelFactura);
+						
+						ventanaImpresion.setSize(570,800);
+						ventanaImpresion.setLocationRelativeTo(ventana);
+						ventanaImpresion.setVisible(true);
+					}
 				}
 				else {
 					// Mostrar mensaje error monto  nulo
@@ -413,7 +395,5 @@ public class RealizarFactura extends JPanel{
 	private Boolean montoNoNulo() {
 		return(totalAPagar !=0.0);
 	}
-	private void imprimirFacturaRespFisico(FacturaDTO factura) {
-		
-	}
+
 }

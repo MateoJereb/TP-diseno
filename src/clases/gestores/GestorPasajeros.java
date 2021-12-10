@@ -183,8 +183,8 @@ public class GestorPasajeros {
 		
 		 LocalDate hoy = LocalDate.now();
 
-	        long diff = ChronoUnit.DAYS.between(pas, hoy);
-	       return ((diff / 365 )>=18);
+	        long diff = ChronoUnit.YEARS.between(pas, hoy);
+	       return (diff >=18);
 		
 	}
 	

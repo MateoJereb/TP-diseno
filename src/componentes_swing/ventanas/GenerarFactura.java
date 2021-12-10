@@ -410,7 +410,7 @@ public class GenerarFactura extends JPanel{
 		JDialog ventanaRealizarFactura = new JDialog(ventana,"Realizar Factura");
 		RealizarFactura panel = new RealizarFactura(estadiaDTO,pasajeroDTO, ventanaRealizarFactura);
 		ventanaRealizarFactura.setContentPane(panel);
-		ventanaRealizarFactura.setSize(600,700);
+		ventanaRealizarFactura.pack();
 		ventanaRealizarFactura.setLocationRelativeTo(null);
 		App.getVentana().setEnabled(false);
 
