@@ -130,8 +130,8 @@ public class GestorPasajeros {
 	}
 	
 	public Boolean crearPasajero(PasajeroDTO pasajero) {
-		AdministradorBDUbicaciones adminBDUbicaciones = new AdministradorBDUbicaciones();
-		Localidad localidad = adminBDUbicaciones.localidadPorId(pasajero.getIdLocalidad().get());
+		GestorGeografico gestorGeografico = GestorGeografico.getInstance();
+		Localidad localidad = gestorGeografico.localidadPorId(pasajero.getIdLocalidad().get());
 		
 		AdministradorBDPasajero adminBDPasajeros = new AdministradorBDPasajero();
 		PosicionIVA posIva = adminBDPasajeros.posicionIvaPorId(pasajero.getIdPosIva().get());

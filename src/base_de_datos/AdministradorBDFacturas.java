@@ -60,7 +60,6 @@ public class AdministradorBDFacturas extends AdministradorBD{
         	 Double monto_neto = factura.getMonto_neto();
         	 Double iva =factura.getIva();
         	 Double monto_total = factura.getMonto_total();
-        	 String estado = EstadoFactura.NO_IMPRESA.name();
         	 Integer estadia = null;
         	 Integer responsable_fisico ;
         	 if(factura.getResponsable_fisico()==null) responsable_fisico = null ;
@@ -75,7 +74,7 @@ public class AdministradorBDFacturas extends AdministradorBD{
  
             
             String insercionPasajero = "INSERT INTO tp_12c.factura VALUES "
-            		+ "("+id+","+estadia+","+responsable_fisico+","+responsable_juridico+",'"+tipo+"',"+monto_neto+","+iva+","+monto_total+",'"+estado+"', '"+fecha+"')";
+            		+ "("+id+","+estadia+","+responsable_fisico+","+responsable_juridico+",null,'"+tipo+"',"+monto_neto+","+iva+","+monto_total+",'NI', '"+fecha+"')";
             
             System.out.println("Inserción realizada: "+insercionPasajero);
             sentencia.executeUpdate(insercionPasajero);

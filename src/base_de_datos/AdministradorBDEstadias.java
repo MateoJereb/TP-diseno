@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -190,7 +191,7 @@ public class AdministradorBDEstadias extends AdministradorBD {
         		for(int i=0;i<estadia.getPasajeros().size()-1;i++) {
         			Pasajero ocupante = estadia.getPasajeros().get(i);
         			Integer id_pasajero = ocupante.getId();
-        			insercionHospeda+="(currval('tp_12c.sec_estadia'),"+id_pasajero+"),";
+        			insercionHospeda+="("+id_pasajero+","+id+"),";
         		}
         		insercionHospeda+="("+estadia.getPasajeros().get(estadia.getPasajeros().size()-1).getId()+","+id+")";
         		
@@ -262,9 +263,20 @@ public class AdministradorBDEstadias extends AdministradorBD {
 				 		+ "AND es.pagado is FALSE	\r\n"
 				 		+ "AND pas.id_posicion_iva = pi.id_posicion_iva\r\n"
 				 		+ "GROUP BY pas.id_pasajero,es.hora_entrada, td.id_tipo_documento, pi.posicion, pi.porcentaje, pi.tipo_factura\r\n"
-				 		+ "HAVING es.hora_entrada <= ALL(SELECT es1.hora_entrada\r\n"
+				 		+ "HAVING es.hora_entrada >= ALL(SELECT es1.hora_entrada\r\n"
 				 		+ "		 								 from tp_12c.estadia es1\r\n"
-				 		+ "		 								 where es1.nro_habitacion= "+nroHabitacion+")";	
+				 		+ "		 								 where es1.nro_habitacion= "+nroHabitacion+")\n"
+				 		+ "UNION\r\n"
+				 		+ "SELECT pas.id_pasajero, pas.apellido, pas.nombre, pas.nro_doc, td.id_tipo_documento, td.tipo, pi.posicion, pi.porcentaje, pi.tipo_factura\r\n"
+				 		+ "FROM tp_12c.estadia es , tp_12c.pasajero pas, tp_12c.tipo_documento td, tp_12c.posicion_iva pi\r\n"
+				 		+ "WHERE es.id_responsable = pas.id_pasajero AND pas.id_tipo_documento =td.id_tipo_documento AND pas.id_posicion_iva = pi.id_posicion_iva\r\n"
+				 		+ "AND es.nro_habitacion = "+nroHabitacion+" \r\n"
+				 		+ "AND es.pagado is FALSE	\r\n"
+				 		+ "GROUP BY pas.id_pasajero,es.hora_entrada, td.id_tipo_documento, pi.posicion, pi.porcentaje, pi.tipo_factura\r\n"
+				 		+ "HAVING es.hora_entrada >= ALL(SELECT es1.hora_entrada\r\n"
+				 		+ "		 								 from tp_12c.estadia es1\r\n"
+				 		+ "		 								 where es1.nro_habitacion= "+nroHabitacion+")\n" 
+				 		;
 				
 						consulta+=" ORDER BY 1";
 								
@@ -349,14 +361,17 @@ public class AdministradorBDEstadias extends AdministradorBD {
 		return estadia;
 	}
 
-	public void actualizarMonto(Estadia estadia, Double costo) {
+	public void actualizarMontoYSalida(Estadia estadia, Double costo, String nuevaHora) {
 		
 		Connection conexion = getConnection();
 		String update;
         Statement sentencia = null;
         ResultSet resultado = null;
+        
+        String textoSalida = estadia.getHora_salida().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))+" "+nuevaHora;
+         
         update = "UPDATE tp_12c.estadia\r\n"
-        		+ "SET monto ="+costo+"\r\n"
+        		+ "SET monto ="+costo+", hora_salida = '"+textoSalida+"'\r\n"
         		+ "where id_estadia = "+estadia.getId();
         try {
         	sentencia = conexion.createStatement();
@@ -366,7 +381,6 @@ public class AdministradorBDEstadias extends AdministradorBD {
 			conexion.setAutoCommit(true);
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}finally {
             if(resultado!=null) try { resultado.close();} catch(SQLException e) {e.printStackTrace();}

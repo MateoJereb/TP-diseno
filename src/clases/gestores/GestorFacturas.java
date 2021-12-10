@@ -57,11 +57,11 @@ public class GestorFacturas {
 		
 		//Si la estadia no se factura, estadiaDTO es null. De lo contrario debe agregarse a la factura.
 		if(estadiaDTO !=null) {
-		GestorEstadias gestorEstadia = GestorEstadias.getInstance();
-		estadia = gestorEstadia.buscarEstadia(estadiaDTO);		
-		factura.setEstadia(estadia);
+			GestorEstadias gestorEstadia = GestorEstadias.getInstance();
+			estadia = gestorEstadia.buscarEstadia(estadiaDTO);		
+			factura.setEstadia(estadia);
 		}
-		Double iva=0.0;
+		
 		if(respDTO.getClass()== PasajeroDTO.class) {
 			
 			GestorPasajeros gestorPasajeros= GestorPasajeros.getInstance();
@@ -85,6 +85,7 @@ public class GestorFacturas {
 		
 		AdministradorBDFacturas admin = new AdministradorBDFacturas();
 		factura.setId(admin.registrarFactura(factura));
+		
 		return factura.getId();
 	}
 	

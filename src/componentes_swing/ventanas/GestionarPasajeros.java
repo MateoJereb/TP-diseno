@@ -321,7 +321,33 @@ public class GestionarPasajeros extends JPanel {
 					App.darAltaPasajero(cApellido.getText(), cNombre.getText(), (TipoDocumentoDTO)lTipoDoc.getSelectedItem(), cNroDoc.getText());
 				}
 				else {
-					//Modificar
+					String mensaje = "<html><body>La funcionalidad de modificar los datos de un<br>pasajero todavía no está disponible.</body></html>";
+					MensajeError ventanaAux = new MensajeError(App.getVentana(), mensaje, "Aceptar", "");
+					ventanaAux.getContentPane().remove(3);
+					
+					App.getVentana().setEnabled(false);
+					ventanaAux.pack();
+					ventanaAux.setLocationRelativeTo(App.getVentana());
+					ventanaAux.setVisible(true); 
+					
+					ventanaAux.addWindowListener(new WindowAdapter() {
+						public void windowClosing(WindowEvent e) {
+							App.getVentana().setEnabled(true);
+							App.getVentana().setVisible(true);
+						}
+					});
+					
+					ActionListener listenerAceptar = new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							ventanaAux.dispose();
+							App.getVentana().setEnabled(true);
+							App.getVentana().setVisible(true);
+						}
+					 };
+					 
+					 ventanaAux.setListeners(listenerAceptar,null);
+					
 				}
 			}
 		});

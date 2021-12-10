@@ -96,6 +96,11 @@ public class GestorGeografico {
 		return salida;
 	}
 	
+	public Localidad localidadPorId(Integer id) {
+		AdministradorBDUbicaciones adminBD = new AdministradorBDUbicaciones();
+		return adminBD.localidadPorId(id);
+	}
+	
 	private List<LocalidadDTO> generarDTOLocalidades(List<Localidad> localidades){
 		List<LocalidadDTO> salida = new ArrayList<LocalidadDTO>();
 		

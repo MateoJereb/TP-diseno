@@ -3,6 +3,7 @@ package clases.gestores;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,6 +128,7 @@ public class GestorEstadias {
 		return salida;
 	
 	}
+	
 	public EstadiaDTO calcularCosto(String nroHabitacion,String horaSalida) {
 		
 		AdministradorBDEstadias adminBd = new AdministradorBDEstadias();
@@ -136,15 +138,17 @@ public class GestorEstadias {
 		Integer cantDias = calcularCantDias(estadia);
 		Double costo = cantDias *estadia.getHabitacion().getCosto_noche();
 		
-		if(estadia.getHora_salida().getHour()>11 && (estadia.getHora_entrada().getHour() <18 || (estadia.getHora_entrada().getHour()==18 && estadia.getHora_salida().getMinute()==0))) costo+= ((estadia.getHabitacion().getCosto_noche())/2);
+		LocalTime hora = LocalTime.parse(horaSalida,DateTimeFormatter.ofPattern("HH:mm"));
+		
+		if(hora.getHour()>11 && (hora.getHour() <18 || (hora.getHour()==18 && hora.getMinute()==0))) costo+= ((estadia.getHabitacion().getCosto_noche())/2);
 		else {
-			if (estadia.getHora_salida().getHour() >18 || (estadia.getHora_salida().getHour() == 18 && estadia.getHora_salida().getMinute()> 0)) 
+			if (hora.getHour() >18 || (hora.getHour() == 18 && hora.getMinute() > 0)) 
 				costo += estadia.getHabitacion().getCosto_noche();
 		}
 		
 		if(cantDias >= estadia.getHabitacion().getDiasParaDescuento()) costo*=(1-estadia.getHabitacion().getDescuento());
 		estadia.setMonto(costo);
-		adminBd.actualizarMonto(estadia, costo);
+		adminBd.actualizarMontoYSalida(estadia, costo, horaSalida);
 		return generarDTO(estadia);
 	}
 	private Integer calcularCantDias(Estadia est){

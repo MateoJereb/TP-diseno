@@ -56,6 +56,9 @@ public class GenerarFactura extends JPanel{
 	private EstadiaDTO estadiaDTO;
 	private PasajeroDTO pasajeroDTO;
 	
+	private String numeroHabAFacturar;
+	private String horaAFacturar; 
+	
 	
 	public GenerarFactura() {
 		super();			
@@ -135,7 +138,6 @@ public class GenerarFactura extends JPanel{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				if(tiempoinvalido() || habitacioninvalida()){
 					String mensaje =  "<html><body>Hay un error en el/los campos Nro. Habitación y/o Hora de Salida.<br>Verifique los datos ingresados e intente de nuevo</body></html>";
 					mostrarError(mensaje);
@@ -154,7 +156,9 @@ public class GenerarFactura extends JPanel{
 						mostrarInformativo(mensaje);
 					}
 					else {
-						estadiaDTO = calcularCosto(cNroHab.getText(), horario.getComponentTimeTextField().getText());
+						numeroHabAFacturar = cNroHab.getText();
+						horaAFacturar = horario.getComponentTimeTextField().getText();
+						estadiaDTO = new EstadiaDTO();
 					}
 					}catch(HabitacionInexistenteException e1) {
 						String mensaje =  "<html><body>No existe una habitación con el nro. indicado.</body></html>";
@@ -284,17 +288,18 @@ public class GenerarFactura extends JPanel{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				if(estadiaDTO==null) mostrarError("<html><body>No se ha seleccionado una estadia no paga aún.</html></body>");
-				else realizarATercero();
+				else{
+					estadiaDTO = calcularCosto(numeroHabAFacturar,horaAFacturar);
+					realizarATercero();
+				}
 			}
 		});
 		siguiente.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				if(estadiaDTO==null) mostrarError("<html><body>No se ha seleccionado una estadia no paga aún.</html></body>");
+				if(estadiaDTO==null) mostrarError("<html><body>Busque una estadía indicando el número de habitación.</html></body>");
 				else {
 				if(tabla.getSelectedRow() ==-1) {
 					String mensaje =  "<html><body>No se selecciono ningún responsable de pago.<br>Seleccione uno y vuelva a intentarlo</body></html>";
@@ -304,6 +309,7 @@ public class GenerarFactura extends JPanel{
 				else {
 					GestorPasajeros gestorPasajero = GestorPasajeros.getInstance();
 					if(gestorPasajero.esMayor((Integer) modelo.getValueAt(tabla.getSelectedRow(), 4))) {
+						estadiaDTO = calcularCosto(numeroHabAFacturar,horaAFacturar);
 						pasajeroDTO = pasajeros.get(tabla.getSelectedRow());
 						realizarFactura();
 					}
@@ -369,20 +375,18 @@ public class GenerarFactura extends JPanel{
 		JDialog ventanaTercero = new JDialog(ventana,"Realizar a nombre de tercero");
 		FacturarTercero panel = new FacturarTercero(estadiaDTO);
 		ventanaTercero.setContentPane(panel);
-		ventanaTercero.setSize(500, 250);
-		ventanaTercero.setLocationRelativeTo(null);
+		ventanaTercero.setSize(450, 200);
+		ventanaTercero.setLocationRelativeTo(App.getVentana());
 		App.getVentana().setEnabled(false);
 
 		
 		panel.getAceptar().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
 				ventanaTercero.dispose();
 				ventana.setEnabled(true);
 				ventana.setVisible(true);
-					
-				}
+			}
 			
 		});
 		
@@ -414,8 +418,6 @@ public class GenerarFactura extends JPanel{
 		ventanaRealizarFactura.setLocationRelativeTo(null);
 		App.getVentana().setEnabled(false);
 
-		
-		
 		panel.getCancelar().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

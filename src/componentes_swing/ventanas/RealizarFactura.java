@@ -59,7 +59,7 @@ public class RealizarFactura extends JPanel{
 	private Double totalAPagar;
 	private Double subTotalConsumos;
 	private JDialog ventana;
-	private LinkedHashMap<ConsumosDTO,Integer> consumos ;
+	private LinkedHashMap<ConsumosDTO,Integer> consumosAFacturar ;
 	private EstadiaDTO estadia;
 	private Object responsable;
 	private EstadiaDTO estadiaAFacturar; //Es la estadia que se factura dependiendo si se selecciona checkEstadia o no. Si no se selecciona se pasa a realizarFactura() como null
@@ -70,7 +70,13 @@ public class RealizarFactura extends JPanel{
 		responsable = resp;
 		estadia = est;
 		estadiaAFacturar = null;
-		consumos = new LinkedHashMap<ConsumosDTO,Integer>();
+		consumosAFacturar = new LinkedHashMap<ConsumosDTO,Integer>();
+		
+		GestorConsumos gestor = GestorConsumos.getInstance();
+		List<ConsumosDTO> listaCons= gestor.buscarConsumos(est.getId().get());
+		
+		for(ConsumosDTO cs : listaCons) consumosAFacturar.put(cs, 0);
+		
 		GridBagConstraints cons = new GridBagConstraints();
 
 		setBorder(new EmptyBorder(10, 20, 10, 20));
@@ -188,10 +194,7 @@ public class RealizarFactura extends JPanel{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				GestorConsumos gestor = GestorConsumos.getInstance();
-				List<ConsumosDTO> consumos= gestor.buscarConsumos(idEstadia);
-				seleccionarConsumos(consumos);
+				seleccionarConsumos(consumosAFacturar);
 			}
 		});
 	}
@@ -231,10 +234,10 @@ public class RealizarFactura extends JPanel{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				GestorFacturas gestor = GestorFacturas.getInstance();
-				Integer idFactura = gestor.facturar(responsable, estadiaAFacturar, consumos);
 				if(montoNoNulo()) {
+					GestorFacturas gestor = GestorFacturas.getInstance();
+					Integer idFactura = gestor.facturar(responsable, estadiaAFacturar, consumosAFacturar);
+					
 					if(idFactura==-1) {
 						//Si la factura no se puede crear, se retorna un id negativo y se muestra el mensaje de Error correspondiente
 						String mensaje ="<html><body>No se pudo generar la factura correctamente<br>Intente nuevamente</body></html>";
@@ -318,14 +321,14 @@ public class RealizarFactura extends JPanel{
 			
 		});
 	}
-	private void seleccionarConsumos(List<ConsumosDTO> consumos){
-		JFrame ventana = App.getVentana();
+	private void seleccionarConsumos(LinkedHashMap<ConsumosDTO,Integer> consumosAFacturar){
 		JDialog ventanaSeleccionarConsumos = new JDialog(ventana,"Seleccionar consumos");
-		SeleccionarConsumos panel = new SeleccionarConsumos(consumos,this);
+		SeleccionarConsumos panel = new SeleccionarConsumos(consumosAFacturar,this);
 		ventanaSeleccionarConsumos.setContentPane(panel);
 		ventanaSeleccionarConsumos.setSize(700,600);
 		ventanaSeleccionarConsumos.setLocationRelativeTo(null);
 		App.getVentana().setEnabled(false);
+		ventana.setEnabled(false);
 
 		
 		panel.getAceptar().addActionListener(new ActionListener() {
@@ -367,8 +370,8 @@ public class RealizarFactura extends JPanel{
 		return cancelar;
 	}
 	public void setConsumos(LinkedHashMap<ConsumosDTO, Integer> cons) {
-		this.consumos=cons;
-		actualizarSubTotalConsumos( cons);
+		this.consumosAFacturar=cons;
+		actualizarSubTotalConsumos(cons);
 		return;
 	}
 	private void actualizarSubTotalConsumos(LinkedHashMap<ConsumosDTO, Integer> cons) {
@@ -379,7 +382,8 @@ public class RealizarFactura extends JPanel{
 			subTotalConsumos+=consumos.getMonto().get()*cons.get(consumos);
 		}
 		
-		totalAPagar+=subTotalConsumos;
+		totalAPagar = subTotalConsumos;
+		if(checkEstadia.isSelected()) totalAPagar += estadiaAFacturar.getMonto().get();
 		agregarIvaTotal(totalAPagar);
 		eConsumos.setText("Consumos de la habitación: $ "+subTotalConsumos);
 		etotal.setText("TOTAL: $ "+totalAPagar);

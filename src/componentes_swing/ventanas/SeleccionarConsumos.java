@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -37,7 +38,7 @@ public class SeleccionarConsumos extends JPanel{
 	private BotonJ aceptar;
 	private BotonJ cancelar;
 	
-	public SeleccionarConsumos(List<ConsumosDTO>consumos, RealizarFactura realizarFact) {
+	public SeleccionarConsumos(LinkedHashMap<ConsumosDTO,Integer>consumosAFacturar, RealizarFactura realizarFact) {
 		super();			
 		
 		setBorder(new EmptyBorder(10, 20, 10, 20));
@@ -106,7 +107,9 @@ public class SeleccionarConsumos extends JPanel{
 					}
 				}
 				
-				modelo.setValueAt( (Double.parseDouble(modelo.getValueAt(fila, 1).toString())/ Double.parseDouble(modelo.getValueAt(fila, 2).toString()))*(Double.parseDouble(modelo.getValueAt(fila, columna).toString())), fila, 4);
+				if(modelo.getValueAt(fila, columna)=="") modelo.setValueAt("0.0", fila, 4);
+                else modelo.setValueAt( (Double.parseDouble(modelo.getValueAt(fila, 1).toString())/ Double.parseDouble(modelo.getValueAt(fila, 2).toString()))*(Double.parseDouble(modelo.getValueAt(fila, columna).toString())), fila, 4);
+				
 			}
 
 			@Override
@@ -145,20 +148,22 @@ public class SeleccionarConsumos extends JPanel{
 		cons.insets = new Insets(20,20,10,5);
 		panel.add(facturarTodos, cons);
 		
-		actualizarTabla(consumos);
+		actualizarTabla(consumosAFacturar);
 		
 		aceptar.addActionListener(new ActionListener() {
-			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				LinkedHashMap<ConsumosDTO,Integer> consumosAFacturar = new LinkedHashMap<ConsumosDTO,Integer>();
-				
-				for(int i=0; i< modelo.getRowCount(); i++) {
+				int i = 0;
+				for(ConsumosDTO c : consumosAFacturar.keySet()) {
 					if(modelo.getValueAt(i, 3).toString() !="") {
-					Integer cantidad =  Integer.parseInt(modelo.getValueAt(i, 3).toString());
-					if (cantidad >0) consumosAFacturar.put(consumos.get(i), cantidad);
+						Integer cantidad =  Integer.parseInt(modelo.getValueAt(i, 3).toString());
+						consumosAFacturar.replace(c, cantidad);
 					}
+					else {
+						consumosAFacturar.replace(c, 0);
+					}
+					
+					i++;
 				}
 				realizarFact.setConsumos(consumosAFacturar);
 			}
@@ -180,16 +185,19 @@ public class SeleccionarConsumos extends JPanel{
 
 		
 	}
-	private void actualizarTabla(List<ConsumosDTO> consumos) {
+	private void actualizarTabla(Map<ConsumosDTO,Integer> consumosAFacturar) {
 		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
 		
-		for(ConsumosDTO c : consumos) {
+		for(ConsumosDTO c : consumosAFacturar.keySet()) {
 			Vector<Object> fila = new Vector<Object>();
+			
+			String cantFacturar = "";
+			if(consumosAFacturar.get(c) > 0) cantFacturar = consumosAFacturar.get(c).toString();
 			
 			fila.add(c.getDescripcion().get());
 			fila.add(c.getMonto().get() * c.getCantidad().get());
 			fila.add(c.getCantidad().get());
-			fila.add("");
+			fila.add(cantFacturar);
 			fila.add(0.00);
 			
 			data.add(fila);
