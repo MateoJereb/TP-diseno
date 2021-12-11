@@ -336,7 +336,7 @@ public class AdministradorBDEstadias extends AdministradorBD {
 				+ "WHERE es.nro_habitacion = hab.nro_habitacion \r\n"
 				+ "AND hab.nro_habitacion = "+nroHabitacion+"\r\n"
 				+ "GROUP BY es.id_estadia, es.hora_entrada, hab.costo_noche, hab.descuento, hab.dias_para_descuento\r\n"
-				+ "HAVING es.hora_entrada <= ALL(SELECT es1.hora_entrada\r\n"
+				+ "HAVING es.hora_entrada >= ALL(SELECT es1.hora_entrada\r\n"
 				+ "		 								 FROM tp_12c.estadia es1\r\n"
 				+ "		 								 WHERE es1.nro_habitacion= "+nroHabitacion+") ";
 		try {

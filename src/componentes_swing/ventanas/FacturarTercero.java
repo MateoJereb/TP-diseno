@@ -13,6 +13,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
@@ -194,14 +196,21 @@ public class FacturarTercero extends JPanel{
 				GestorResponsablePago gestor = GestorResponsablePago.getInstance();
 				respDTO = null;
 				if(cCuit.getText().length()>0) {
-					try{
-						respDTO = gestor.buscarResponsable(cCuit.getText());
-						razonSocial.setText("Razón Social: "+respDTO.getRazon_social().get());
-						razonSocial.setForeground(Color.BLACK);
-						aceptar.setEnabled(true);
+					if(formatoCuitValido()) {
+						try{
+							respDTO = gestor.buscarResponsable(cCuit.getText());
+							razonSocial.setText("Razón Social: "+respDTO.getRazon_social().get());
+							razonSocial.setForeground(Color.BLACK);
+							aceptar.setEnabled(true);
 
-					}catch (RPInexistenteException e1) {
-						razonSocial.setText("Responsable de pago no encontrado");
+						}catch (RPInexistenteException e1) {
+							razonSocial.setText("Responsable de pago no encontrado");
+							razonSocial.setForeground(Color.RED);
+							aceptar.setEnabled(false);
+						}
+					}
+					else {
+						razonSocial.setText("Ingrese un cuit con el formato xx-xxxxxxxx-x");
 						razonSocial.setForeground(Color.RED);
 						aceptar.setEnabled(false);
 					}
@@ -362,5 +371,14 @@ public class FacturarTercero extends JPanel{
 	}
 	public BotonJ getAceptar() {
 		return aceptar;
+	}
+	
+	private Boolean formatoCuitValido() {
+		if(cCuit.getText().length() == 0) return true;
+		
+		Pattern pattern = Pattern.compile("[0-9][0-9][-][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][-][0-9]");
+		Matcher mather = pattern.matcher(cCuit.getText());
+		
+		return mather.find();
 	}
 }

@@ -11,6 +11,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.ParseException;
@@ -613,7 +615,6 @@ public class DarAltaPasajero extends JPanel {
 	    panelBotones.add(siguiente, cons);
 	    cons.gridx=4;
 	    panelBotones.add(cancelar, cons);
-			
 	}
 	
 	private void configurarDatePicker() {
@@ -714,67 +715,75 @@ public class DarAltaPasajero extends JPanel {
 				if(obligatoriosCompletos()) {
 					if(emailValido()) {
 						if(pisoNumerico()) {
-							if(cuitValido()) {
-								if(fechaNacimientoValida()) {
-									GestorPasajeros gestor = GestorPasajeros.getInstance();
-									
-									PasajeroDTO datos = new PasajeroDTO();
-									datos.setNro_doc(cNroDoc.getText());
-									datos.setIdTipoDoc(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getId());
-									datos.setTipo(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getTipo());
-									
-									if(gestor.dniExistente(datos)) {
-										MensajeInformativo existeDoc = new MensajeInformativo(App.getVentana(),"<html><body>¡CUIDADO! El tipo y número de documento ya<br>existen en el sistema.</body><html>","Aceptar igualmente","Corregir");
-										App.getVentana().setEnabled(false);
-										existeDoc.pack();
-										existeDoc.setLocationRelativeTo(App.getVentana());
-										existeDoc.setVisible(true);
+							if(formatoCuitValido()) {
+								if(cuitValido()) {
+									if(fechaNacimientoValida()) {
+										GestorPasajeros gestor = GestorPasajeros.getInstance();
+										
+										PasajeroDTO datos = new PasajeroDTO();
+										datos.setNro_doc(cNroDoc.getText());
+										datos.setIdTipoDoc(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getId());
+										datos.setTipo(((TipoDocumentoDTO)lTipoDoc.getSelectedItem()).getTipo());
+										
+										if(gestor.dniExistente(datos)) {
+											MensajeInformativo existeDoc = new MensajeInformativo(App.getVentana(),"<html><body>¡CUIDADO! El tipo y número de documento ya<br>existen en el sistema.</body><html>","Aceptar igualmente","Corregir");
+											App.getVentana().setEnabled(false);
+											existeDoc.pack();
+											existeDoc.setLocationRelativeTo(App.getVentana());
+											existeDoc.setVisible(true);
 
-										existeDoc.addWindowListener(new WindowAdapter() {
-											public void windowClosing(WindowEvent e) {
-												App.getVentana().setEnabled(true);
-												App.getVentana().setVisible(true);
-											}
-										});
-										
-										ActionListener listenerAceptar = new ActionListener() {
-											@Override
-											public void actionPerformed(ActionEvent e) {
-												existeDoc.dispose();
-												App.getVentana().setEnabled(true);
-												App.getVentana().setVisible(true);
-												crearPasajero();
-											}									
-										};
-										
-										ActionListener listenerCorregir = new ActionListener() {
-											@Override
-											public void actionPerformed(ActionEvent e) {
-												
-												existeDoc.dispose();
-												App.getVentana().setEnabled(true);
-												App.getVentana().setVisible(true);
-												lTipoDoc.requestFocus();
-											}
-										};
-										
-										existeDoc.setListeners(listenerAceptar, listenerCorregir);
+											existeDoc.addWindowListener(new WindowAdapter() {
+												public void windowClosing(WindowEvent e) {
+													App.getVentana().setEnabled(true);
+													App.getVentana().setVisible(true);
+												}
+											});
+											
+											ActionListener listenerAceptar = new ActionListener() {
+												@Override
+												public void actionPerformed(ActionEvent e) {
+													existeDoc.dispose();
+													App.getVentana().setEnabled(true);
+													App.getVentana().setVisible(true);
+													crearPasajero();
+												}									
+											};
+											
+											ActionListener listenerCorregir = new ActionListener() {
+												@Override
+												public void actionPerformed(ActionEvent e) {
+													
+													existeDoc.dispose();
+													App.getVentana().setEnabled(true);
+													App.getVentana().setVisible(true);
+													lTipoDoc.requestFocus();
+												}
+											};
+											
+											existeDoc.setListeners(listenerAceptar, listenerCorregir);
+										}
+										else {
+											crearPasajero();
+										}
 									}
 									else {
-										crearPasajero();
+										datePicker.getComponent(0).setBackground(new Color(255,200,200));
+										datePicker.getComponent(1).requestFocus();
+										camposInvalidos.setText("La fecha de nacimiento no puede ser posterior a la actual");
+										camposInvalidos.setVisible(true);
 									}
 								}
 								else {
-									datePicker.getComponent(0).setBackground(new Color(255,200,200));
-									datePicker.getComponent(1).requestFocus();
-									camposInvalidos.setText("La fecha de nacimiento no puede ser posterior a la actual");
+									cCUIT.setBackground(new Color(255,200,200));
+									cCUIT.requestFocus();
+									camposInvalidos.setText("Los Responsables Inscriptos deben tener CUIT");
 									camposInvalidos.setVisible(true);
 								}
 							}
 							else {
 								cCUIT.setBackground(new Color(255,200,200));
 								cCUIT.requestFocus();
-								camposInvalidos.setText("Los Responsables Inscriptos deben tener CUIT");
+								camposInvalidos.setText("Ingrese un CUIT con el formato xx-xxxxxxxx-x");
 								camposInvalidos.setVisible(true);
 							}
 						}
@@ -836,6 +845,13 @@ public class DarAltaPasajero extends JPanel {
 				
 				confirmacion.setListeners(listenerSi,listenerNo);
 			}
+		});
+		
+		  cCUIT.addKeyListener(new KeyAdapter(){
+			   public void keyTyped(KeyEvent e) {
+			      char caracter = e.getKeyChar();
+			      if(((caracter < '0') || (caracter > '9')) && (caracter != '\b') && (caracter != '-')) e.consume();  
+			   }
 		});
 
 	}
@@ -953,6 +969,15 @@ public class DarAltaPasajero extends JPanel {
 		}
 		
 		return true;
+	}
+	
+	private Boolean formatoCuitValido() {
+		if(cCUIT.getText().length() == 0) return true;
+		
+		Pattern pattern = Pattern.compile("[0-9][0-9][-][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][-][0-9]");
+		Matcher mather = pattern.matcher(cCUIT.getText());
+		
+		return mather.find();
 	}
 	
 	private Boolean cuitValido() {

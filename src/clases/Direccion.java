@@ -31,7 +31,7 @@ public class Direccion {
 	public Direccion(PasajeroDTO dto) {
 		calle = dto.getCalle().get();
 		numero = dto.getNumero().get();
-		if(dto.getNumero().isPresent()) numero = dto.getNumero().get();
+		if(dto.getPiso().isPresent()) piso = dto.getPiso().get();
 		if(dto.getDepartamento().isPresent()) departamento = dto.getDepartamento().get();
 	}
 
