@@ -41,7 +41,7 @@ public class FacturaA extends JPanel {
 		tipoFactura();
 		infoCliente(factura.getResponsable_fisico(),factura.getResponsable_juridico());
 		detalles(factura,estadiaFacturada);
-		total();
+		total(factura);
 	}
 	
 	private void infoHotelYFactura(Integer nroFactura, LocalDateTime fechaFactura) {
@@ -177,8 +177,8 @@ public class FacturaA extends JPanel {
 		if(respFisico.isPresent()) {
 			razon = respFisico.get().getNombre().get()+" "+respFisico.get().getApellido().get();
 			direccion = respFisico.get().getCalle().get()+ " "+respFisico.get().getNumero().get();
-			if(respFisico.get().getPiso().isPresent()) direccion+="Piso "+respFisico.get().getPiso().get();
-			if(respFisico.get().getDepartamento().isPresent()) direccion+="Departamento "+respFisico.get().getDepartamento().get();
+			if(respFisico.get().getPiso().isPresent()) direccion+=" Piso "+respFisico.get().getPiso().get();
+			if(respFisico.get().getDepartamento().isPresent()) direccion+=" Departamento "+respFisico.get().getDepartamento().get();
 			localidad = respFisico.get().getNombreLocalidad().get();
 			codigoPostal = respFisico.get().getCodigo_postal().get();
 			telefono = respFisico.get().getTelefono().get();
@@ -263,15 +263,15 @@ public class FacturaA extends JPanel {
 		if(estadiaFacturada) {
 			Vector<Object> filaEstadia = new Vector<Object>();
 			filaEstadia.add(descripcionEstadia(factura.getEstadia().get()));
-			filaEstadia.add(factura.getEstadia().get().getMonto());
+			filaEstadia.add(factura.getEstadia().get().getMonto().get());
 			filaEstadia.add(1);
-			filaEstadia.add(factura.getEstadia().get().getMonto());
+			filaEstadia.add(factura.getEstadia().get().getMonto().get());
 			data.add(filaEstadia);
 		}
 		
 		for(ConsumoFacturadoDTO c : factura.getConsumos().get()) {
 			Vector<Object> fila = new Vector<Object>();
-			fila.add(c.getConsumo().get().getDescripcion());
+			fila.add(c.getConsumo().get().getDescripcion().get());
 			fila.add(c.getConsumo().get().getMonto().get());
 			fila.add(c.getCantidad().get());
 			fila.add(c.getCantidad().get()*c.getConsumo().get().getMonto().get());
@@ -311,7 +311,7 @@ public class FacturaA extends JPanel {
 		return "Estadía "+tipoHab+" "+cantDias+" días";
 	}
 
-	private void total() {
+	private void total(FacturaDTO factura) {
 		JPanel total = new JPanel(new GridBagLayout());
 		total.setBackground(Color.WHITE);
 		JPanel subizq = new JPanel(new GridBagLayout());
@@ -328,8 +328,8 @@ public class FacturaA extends JPanel {
 		subder.setBorder(blackLineBorder);
 		
 		EtiquetaJ textoSubDer = new EtiquetaJ("<html><body>"
-				+ "[sub-total]<br>"
-				+ "[iva]</body></html>");
+				+ factura.getMonto_neto().get()+"<br>"
+				+ (factura.getIva().get()*100)+"</body></html>");
 		textoSubDer.setFont(new Font("Calibri",Font.PLAIN,11));
 		
 		GridBagConstraints cons = new GridBagConstraints();
@@ -357,7 +357,7 @@ public class FacturaA extends JPanel {
 		totDer.setBackground(Color.WHITE);
 		totDer.setBorder(blackLineBorder);
 		
-		EtiquetaJ textoTotDer = new EtiquetaJ("[total]");
+		EtiquetaJ textoTotDer = new EtiquetaJ(factura.getMonto_total().get().toString());
 		textoTotDer.setFont(new Font("Calibri",Font.BOLD,14));
 		
 		totIzq.add(textoTotIzq,cons);

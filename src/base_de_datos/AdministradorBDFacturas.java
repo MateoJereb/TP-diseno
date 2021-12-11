@@ -166,7 +166,7 @@ public class AdministradorBDFacturas extends AdministradorBD{
             		direccion.setCalle(resultado.getString(9));
             		direccion.setNumero(resultado.getString(10));
             		direccion.setDepartamento(resultado.getString(21));
-            		direccion.setPiso(resultado.getInt(22));
+            		if(resultado.getObject(22) != null) direccion.setPiso(resultado.getInt(22));
             		localidad.setNombre(resultado.getString(11));
             		localidad.setCodigo_postal(resultado.getString(12));
             		estadia.setHora_entrada(LocalDateTime.parse(resultado.getString(13), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
@@ -282,7 +282,7 @@ public class AdministradorBDFacturas extends AdministradorBD{
             		direccion.setCalle(resultado.getString(10));
             		direccion.setNumero(resultado.getString(11));
             		direccion.setDepartamento(resultado.getString(22));
-            		direccion.setPiso(resultado.getInt(23));
+            		if(resultado.getObject(23) != null) direccion.setPiso(resultado.getInt(23));
             		localidad.setNombre(resultado.getString(12));
             		localidad.setCodigo_postal(resultado.getString(13));
             		estadia.setHora_entrada(LocalDateTime.parse(resultado.getString(14), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));

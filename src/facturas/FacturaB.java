@@ -43,7 +43,7 @@ public class FacturaB extends JPanel {
 		tipoFactura();
 		infoCliente(factura.getResponsable_fisico(),factura.getResponsable_juridico());
 		detalles(factura,estadiaFacturada);
-		total();
+		total(factura);
 	}
 	
 	private void infoHotelYFactura(Integer nroFactura, LocalDateTime fechaFactura) {
@@ -265,15 +265,15 @@ public class FacturaB extends JPanel {
 		if(estadiaFacturada) {
 			Vector<Object> filaEstadia = new Vector<Object>();
 			filaEstadia.add(descripcionEstadia(factura.getEstadia().get()));
-			filaEstadia.add(factura.getEstadia().get().getMonto());
+			filaEstadia.add(factura.getEstadia().get().getMonto().get());
 			filaEstadia.add(1);
-			filaEstadia.add(factura.getEstadia().get().getMonto());
+			filaEstadia.add(factura.getEstadia().get().getMonto().get());
 			data.add(filaEstadia);
 		}
 		
 		for(ConsumoFacturadoDTO c : factura.getConsumos().get()) {
 			Vector<Object> fila = new Vector<Object>();
-			fila.add(c.getConsumo().get().getDescripcion());
+			fila.add(c.getConsumo().get().getDescripcion().get());
 			fila.add(c.getConsumo().get().getMonto().get());
 			fila.add(c.getCantidad().get());
 			fila.add(c.getCantidad().get()*c.getConsumo().get().getMonto().get());
@@ -312,7 +312,7 @@ public class FacturaB extends JPanel {
 		return "Estadía "+tipoHab+" "+cantDias+" días";
 	}
 	
-	private void total() {
+	private void total(FacturaDTO factura) {
 		JPanel total = new JPanel(new GridBagLayout());
 		total.setBackground(Color.WHITE);
 		
@@ -327,7 +327,7 @@ public class FacturaB extends JPanel {
 		totDer.setBackground(Color.WHITE);
 		totDer.setBorder(blackLineBorder);
 		
-		EtiquetaJ textoTotDer = new EtiquetaJ("[total]");
+		EtiquetaJ textoTotDer = new EtiquetaJ(factura.getMonto_total().get().toString());
 		textoTotDer.setFont(new Font("Calibri",Font.BOLD,14));
 		
 		
