@@ -1,6 +1,7 @@
 package base_de_datos;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -66,7 +67,7 @@ public class AdministradorBDFacturas extends AdministradorBD{
         	 else responsable_fisico = factura.getResponsable_fisico().get().getId() ;
         	 String responsable_juridico;
         	 if(factura.getResponsable_juridico()==null) responsable_juridico = null;
-        	 else responsable_juridico = factura.getResponsable_juridico().get().getCuit() ;
+        	 else responsable_juridico = "'"+factura.getResponsable_juridico().get().getCuit()+"'";
     
         	 if(factura.getEstadia() !=null) {
         	  estadia = factura.getEstadia().getId();
@@ -76,7 +77,6 @@ public class AdministradorBDFacturas extends AdministradorBD{
             String insercionPasajero = "INSERT INTO tp_12c.factura VALUES "
             		+ "("+id+","+estadia+","+responsable_fisico+","+responsable_juridico+",null,'"+tipo+"',"+monto_neto+","+iva+","+monto_total+",'NI', '"+fecha+"')";
             
-            System.out.println("Inserción realizada: "+insercionPasajero);
             sentencia.executeUpdate(insercionPasajero);
             
             //Factura_consumo
@@ -128,12 +128,11 @@ public class AdministradorBDFacturas extends AdministradorBD{
         Statement sentencia = null;
         ResultSet resultado = null;
         String consulta = "SELECT fac.id_factura, fac.fecha, fac.tipo, fac.monto_neto, fac.monto_total, fac.iva, rp.razon_social, rp.telefono, dir.calle, dir.numero, loc.nombre, loc.codigo_postal, es.hora_entrada, es.hora_salida, hab.nro_habitacion, hab.tipo, cons.descripcion, cons.monto, fc.cantidad, dir.departamento, dir.piso, es.monto\r\n"
-        		+ "FROM tp_12c.estadia es,tp_12c.responsable_pago rp, tp_12c.factura fac, tp_12c.habitacion hab, tp_12c.consumo cons, tp_12c.direccion dir, tp_12c.localidad loc,  tp_12c.factura_consumo fc\r\n"
-        		+ "WHERE fac.id_factura = fc.id_factura and cons.id_consumo = fc.id_consumo\r\n"
-        		+ "AND fac.id_estadia = es.id_estadia\r\n"
-        		+ "AND es.nro_habitacion = hab.nro_habitacion \r\n"
+        		+ "FROM tp_12c.estadia es,tp_12c.responsable_pago rp, tp_12c.habitacion hab, tp_12c.direccion dir, tp_12c.localidad loc, tp_12c.factura fac LEFT JOIN (tp_12c.factura_consumo fc LEFT JOIN tp_12c.consumo cons ON fc.id_consumo = cons.id_consumo) ON fac.id_factura = fc.id_factura\r\n"
+        		+ "WHERE fac.id_estadia = es.id_estadia\r\n"
+        		+ "AND es.nro_habitacion = hab.nro_habitacion\r\n"
         		+ "AND fac.cuit_responsable_pago = rp.cuit\r\n"
-        		+ "AND es.nro_habitacion = hab.nro_habitacion \r\n"
+        		+ "AND es.nro_habitacion = hab.nro_habitacion\r\n"
         		+ "AND dir.cuit_responsable_pago = rp.cuit\r\n"
         		+ "AND loc.id_localidad = dir.id_localidad\r\n"
         		+ "AND fac.id_factura ="+idFactura;
@@ -165,13 +164,13 @@ public class AdministradorBDFacturas extends AdministradorBD{
             		responsable.setTelefono(resultado.getString(8));
             		direccion.setCalle(resultado.getString(9));
             		direccion.setNumero(resultado.getString(10));
-            		direccion.setDepartamento(resultado.getString(21));
-            		if(resultado.getObject(22) != null) direccion.setPiso(resultado.getInt(22));
+            		direccion.setDepartamento(resultado.getString(20));
+            		if(resultado.getObject(21) != null) direccion.setPiso(resultado.getInt(21));
             		localidad.setNombre(resultado.getString(11));
             		localidad.setCodigo_postal(resultado.getString(12));
             		estadia.setHora_entrada(LocalDateTime.parse(resultado.getString(13), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             		estadia.setHora_salida(LocalDateTime.parse(resultado.getString(14), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            		estadia.setMonto(resultado.getDouble(23));
+            		estadia.setMonto(resultado.getDouble(22));
             		String TipoHabitacion = resultado.getString(16);
             		
             		if(TipoHabitacion.equals("I")) {
@@ -197,18 +196,21 @@ public class AdministradorBDFacturas extends AdministradorBD{
             		habitacion.setNro(resultado.getInt(15));
 
             		firstRow=false;
-            	ConsumoFacturado consumoFacturado = new ConsumoFacturado();
-            	Consumo consumo = new Consumo();
-            	consumo.setDescripcion(resultado.getString(18));
-            	consumo.setMonto(resultado.getDouble(19));
+            	}
             	
-            	consumoFacturado.setFactura(factura);
-            	consumoFacturado.setConsumo(consumo);
-            	consumoFacturado.setCantidad(resultado.getInt(20));
-            	consumosFacurados.add(consumoFacturado);
-            	
-            	
-            }
+            	if(resultado.getString(17) != null) {
+        			ConsumoFacturado consumoFacturado = new ConsumoFacturado();
+                	Consumo consumo = new Consumo();
+                	consumo.setDescripcion(resultado.getString(17));
+                	consumo.setMonto(resultado.getDouble(18));
+                	
+                	consumoFacturado.setFactura(factura);
+                	consumoFacturado.setConsumo(consumo);
+                	consumoFacturado.setCantidad(resultado.getInt(19));
+                	consumosFacurados.add(consumoFacturado);
+                	
+                	System.out.println("CONSUMO: "+consumo.getDescripcion()+" x"+consumoFacturado.getCantidad());
+        		}
             }
             factura.setConsumos(consumosFacurados);
             factura.setEstadia(estadia);
@@ -241,15 +243,15 @@ public class AdministradorBDFacturas extends AdministradorBD{
         Statement sentencia = null;
         ResultSet resultado = null;
         String consulta = "SELECT fac.id_factura, fac.fecha, fac.tipo, fac.monto_neto, fac.monto_total, fac.iva, pas.nombre, pas.apellido, pas.telefono, dir.calle, dir.numero, loc.nombre, loc.codigo_postal, es.hora_entrada, es.hora_salida, hab.nro_habitacion, hab.tipo, cons.descripcion, cons.monto, fc.cantidad, pi.posicion, dir.departamento, dir.piso, es.monto\r\n"
-        		+ "FROM tp_12c.estadia es,tp_12c.pasajero pas, tp_12c.factura fac, tp_12c.habitacion hab, tp_12c.consumo cons, tp_12c.direccion dir, tp_12c.localidad loc, tp_12c.posicion_iva pi, tp_12c.factura_consumo fc\r\n"
-        		+ "WHERE fac.id_factura = fc.id_factura and cons.id_consumo = fc.id_consumo\r\n"
-        		+ "AND fac.id_estadia = es.id_estadia\r\n"
-        		+ "AND es.nro_habitacion = hab.nro_habitacion \r\n"
+        		+ "FROM tp_12c.estadia es, tp_12c.pasajero pas, tp_12c.habitacion hab, tp_12c.direccion dir, tp_12c.localidad loc, tp_12c.posicion_iva pi, tp_12c.factura fac LEFT JOIN (tp_12c.factura_consumo fc LEFT JOIN tp_12c.consumo cons ON fc.id_consumo = cons.id_consumo) ON fac.id_factura = fc.id_factura\r\n"
+        		+ "WHERE fac.id_estadia = es.id_estadia\r\n"
+        		+ "AND es.nro_habitacion = hab.nro_habitacion\r\n"
         		+ "AND fac.id_pasajero = pas.id_pasajero\r\n"
         		+ "AND es.nro_habitacion = hab.nro_habitacion \r\n"
         		+ "AND dir.id_pasajero = pas.id_pasajero\r\n"
         		+ "AND loc.id_localidad = dir.id_localidad\r\n"
         		+ "AND pi.id_posicion_iva = pas.id_posicion_iva\r\n"
+        		+ "AND (cons.id_consumo IS NULL OR fc.cantidad > 0)\r\n"
         		+ "AND fac.id_factura = "+idFactura;
         
         try {
@@ -314,16 +316,17 @@ public class AdministradorBDFacturas extends AdministradorBD{
             		posIva.setPosicion(resultado.getString(21));
             	}
             	firstRow=false;
-            	ConsumoFacturado consumoFacturado = new ConsumoFacturado();
-            	Consumo consumo = new Consumo();
-            	consumo.setDescripcion(resultado.getString(18));
-            	consumo.setMonto(resultado.getDouble(19));
+            	if(resultado.getString(18) != null) {
+            		ConsumoFacturado consumoFacturado = new ConsumoFacturado();
+            		Consumo consumo = new Consumo();
+            		consumo.setDescripcion(resultado.getString(18));
+            		consumo.setMonto(resultado.getDouble(19));
             	
-            	consumoFacturado.setFactura(factura);
-            	consumoFacturado.setConsumo(consumo);
-            	consumoFacturado.setCantidad(resultado.getInt(20));
-            	consumosFacurados.add(consumoFacturado);
-            	
+            		consumoFacturado.setFactura(factura);
+            		consumoFacturado.setConsumo(consumo);
+            		consumoFacturado.setCantidad(resultado.getInt(20));
+            		consumosFacurados.add(consumoFacturado);
+            	}
             	
             }
             factura.setConsumos(consumosFacurados);
@@ -348,5 +351,27 @@ public class AdministradorBDFacturas extends AdministradorBD{
         if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
     }
         return factura;
+	}
+
+	public void imprimirFactura(Integer id) {
+		
+		Connection conexion = getConnection();
+		Statement sentencia = null;
+      
+        
+        try {
+        	String consulta = "UPDATE tp_12c.factura SET estado = 'I' WHERE id_factura = "+id;
+        	sentencia = conexion.createStatement();
+        	sentencia.executeUpdate(consulta);
+        	
+        	System.out.println("Actualización realizada: "+consulta);
+           
+        }catch (SQLException e1) {
+        	e1.printStackTrace();
+        }
+        finally {
+            if(sentencia!=null) try { sentencia.close();} catch(SQLException e) {e.printStackTrace();}
+            if(conexion!=null) try { conexion.close();} catch(SQLException e) {e.printStackTrace();}
+        }
 	}
 }

@@ -67,8 +67,9 @@ public class SeleccionarConsumos extends JPanel{
 		tabla = new TablaJ(modelo);
 		tabla.getColumnModel().getColumn(0).setPreferredWidth(300);
 		tabla.getColumnModel().getColumn(1).setPreferredWidth(100);
-		tabla.getColumnModel().getColumn(2).setPreferredWidth(30);
-		tabla.getColumnModel().getColumn(3).setPreferredWidth(75);
+		tabla.getColumnModel().getColumn(2).setPreferredWidth(50);
+		tabla.getColumnModel().getColumn(3).setPreferredWidth(120);
+		tabla.getColumnModel().getColumn(4).setPreferredWidth(120);
 		
 		tabla.getColumnModel().getColumn(3).setCellRenderer(new CantidadAFacturarRenderer());
 		

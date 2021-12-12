@@ -63,7 +63,7 @@ public class AdministradorBDResponsablePago extends AdministradorBD{
 		
 		String consulta ="SELECT cuit, razon_social, telefono\r\n"
 				+ "FROM tp_12c.responsable_pago\r\n"
-				+ "WHERE cuit = " +cuit;
+				+ "WHERE cuit = '" +cuit+"'";
 		
 		try {
 			sentencia = conexion.prepareStatement(consulta);

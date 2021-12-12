@@ -220,4 +220,8 @@ public class GestorFacturas {
 
 	}
 	
+	public void imprimirFactura(Integer idFactura) {
+		AdministradorBDFacturas adminBD = new AdministradorBDFacturas();
+		adminBD.imprimirFactura(idFactura);
+	}
 }

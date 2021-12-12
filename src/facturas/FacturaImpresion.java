@@ -20,13 +20,15 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
+import clases.dto.FacturaDTO;
+import clases.gestores.GestorFacturas;
 import componentes_swing.*;
 
 public class FacturaImpresion extends JDialog implements Printable{
 	
 	private JPanel panelImpresion;
 	
-	public FacturaImpresion(JFrame ventanaPadre,JPanel factura) {
+	public FacturaImpresion(JFrame ventanaPadre,JPanel factura, FacturaDTO facturaDTO) {
 		super(ventanaPadre,"Imprimir factura");
 		
 		JPanel panelPrincipal = new JPanel(new GridBagLayout());
@@ -40,6 +42,8 @@ public class FacturaImpresion extends JDialog implements Printable{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				imprimirFactura(e);
+				GestorFacturas gestor = GestorFacturas.getInstance();
+				gestor.imprimirFactura(facturaDTO.getId_factura().get());
 			}			
 		});
 		

@@ -187,8 +187,8 @@ public class FacturaA extends JPanel {
 		else {
 			razon = respJuridico.get().getRazon_social().get();
 			direccion = respJuridico.get().getCalle().get()+ " "+respJuridico.get().getNumero().get();
-			if(respJuridico.get().getPiso().isPresent()) direccion+="Piso "+respJuridico.get().getPiso().get();
-			if(respJuridico.get().getDepartamento().isPresent()) direccion+="Departamento "+respJuridico.get().getDepartamento().get();
+			if(respJuridico.get().getPiso().isPresent()) direccion+=" Piso "+respJuridico.get().getPiso().get();
+			if(respJuridico.get().getDepartamento().isPresent()) direccion+=" Departamento "+respJuridico.get().getDepartamento().get();
 			localidad = respJuridico.get().getNombreLocalidad().get();
 			codigoPostal = respJuridico.get().getCodigo_postal().get();
 			telefono = respJuridico.get().getTelefono().get();
@@ -381,6 +381,7 @@ public class FacturaA extends JPanel {
 		cons.anchor = GridBagConstraints.CENTER;
 		cons.weightx = 0;
 		cons.fill = GridBagConstraints.HORIZONTAL;
+		
 		total.add(subizq,cons);
 		
 		cons.gridx = 2;

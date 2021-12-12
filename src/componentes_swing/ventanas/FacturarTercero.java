@@ -275,8 +275,6 @@ public class FacturarTercero extends JPanel{
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							// TODO Auto-generated method stub
-							
 							conf.dispose();
 							App.getVentana().setEnabled(true);
 							App.getVentana().setVisible(true);
@@ -299,7 +297,7 @@ public class FacturarTercero extends JPanel{
 						
 					};
 					
-					conf.setListeners(listenerAceptar, null);
+					conf.setListeners(listenerAceptar, listenerCancelar);
 		
 	}
 			}
@@ -315,8 +313,8 @@ public class FacturarTercero extends JPanel{
 		JDialog ventanaRealizarFactura = new JDialog(ventana,"Realizar Factura");
 		RealizarFactura panel = new RealizarFactura(estDTO,respDTO,ventanaRealizarFactura);
 		ventanaRealizarFactura.setContentPane(panel);
-		ventanaRealizarFactura.setSize(600,700);
-		ventanaRealizarFactura.setLocationRelativeTo(null);
+		ventanaRealizarFactura.pack();
+		ventanaRealizarFactura.setLocationRelativeTo(App.getVentana());
 		App.getVentana().setEnabled(false);
 
 		

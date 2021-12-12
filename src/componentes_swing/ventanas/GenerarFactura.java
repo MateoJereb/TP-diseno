@@ -288,7 +288,7 @@ public class GenerarFactura extends JPanel{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(estadiaDTO==null) mostrarError("<html><body>No se ha seleccionado una estadia no paga aún.</html></body>");
+				if(estadiaDTO==null) mostrarError("<html><body>Busque una estadía indicando el número de<br>habitación y la hora de salida.</html></body>");
 				else{
 					estadiaDTO = calcularCosto(numeroHabAFacturar,horaAFacturar);
 					realizarATercero();
@@ -299,7 +299,7 @@ public class GenerarFactura extends JPanel{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(estadiaDTO==null) mostrarError("<html><body>Busque una estadía indicando el número de habitación.</html></body>");
+				if(estadiaDTO==null) mostrarError("<html><body>Busque una estadía indicando el número de<br>habitación y la hora de salida.</html></body>");
 				else {
 				if(tabla.getSelectedRow() ==-1) {
 					String mensaje =  "<html><body>No se selecciono ningún responsable de pago.<br>Seleccione uno y vuelva a intentarlo</body></html>";
@@ -415,7 +415,7 @@ public class GenerarFactura extends JPanel{
 		RealizarFactura panel = new RealizarFactura(estadiaDTO,pasajeroDTO, ventanaRealizarFactura);
 		ventanaRealizarFactura.setContentPane(panel);
 		ventanaRealizarFactura.pack();
-		ventanaRealizarFactura.setLocationRelativeTo(null);
+		ventanaRealizarFactura.setLocationRelativeTo(App.getVentana());
 		App.getVentana().setEnabled(false);
 
 		panel.getCancelar().addActionListener(new ActionListener() {

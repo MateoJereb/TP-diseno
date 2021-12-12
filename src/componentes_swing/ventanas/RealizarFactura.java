@@ -236,7 +236,15 @@ public class RealizarFactura extends JPanel{
 			public void actionPerformed(ActionEvent e) {
 				if(montoNoNulo()) {
 					GestorFacturas gestor = GestorFacturas.getInstance();
-					Integer idFactura = gestor.facturar(responsable, estadiaAFacturar, consumosAFacturar);
+					
+					LinkedHashMap<ConsumosDTO,Integer> mapFactura = new LinkedHashMap<ConsumosDTO, Integer>();
+					
+					for(ConsumosDTO c : consumosAFacturar.keySet()) {
+						if(consumosAFacturar.get(c) > 0) mapFactura.put(c, consumosAFacturar.get(c));
+					}
+					
+					Integer idFactura = gestor.facturar(responsable, estadiaAFacturar, mapFactura);
+					
 					
 					if(idFactura==-1) {
 						//Si la factura no se puede crear, se retorna un id negativo y se muestra el mensaje de Error correspondiente
@@ -246,7 +254,7 @@ public class RealizarFactura extends JPanel{
 					
 						App.getVentana().setEnabled(false);
 						error.pack();
-						error.setLocationRelativeTo(App.getVentana());
+						error.setLocationRelativeTo(ventana);
 						error.setVisible(true); 
 					
 						error.addWindowListener(new WindowAdapter() {
@@ -280,10 +288,10 @@ public class RealizarFactura extends JPanel{
 						if(facturaDTO.getTipo().get() == TipoFactura.A) panelFactura = new FacturaA(facturaDTO,checkEstadia.isSelected());
 						else panelFactura = new FacturaB(facturaDTO,checkEstadia.isSelected());
 							
-						FacturaImpresion ventanaImpresion = new FacturaImpresion(App.getVentana(), panelFactura);
+						FacturaImpresion ventanaImpresion = new FacturaImpresion(App.getVentana(), panelFactura,facturaDTO);
 						
 						ventanaImpresion.setSize(570,800);
-						ventanaImpresion.setLocationRelativeTo(ventana);
+						ventanaImpresion.setLocationRelativeTo(App.getVentana());
 						ventanaImpresion.setVisible(true);
 					}
 				}
@@ -295,7 +303,7 @@ public class RealizarFactura extends JPanel{
 					
 					App.getVentana().setEnabled(false);
 					error.pack();
-					error.setLocationRelativeTo(App.getVentana());
+					error.setLocationRelativeTo(ventana);
 					error.setVisible(true); 
 					error.addWindowListener(new WindowAdapter() {
 						public void windowClosing(WindowEvent e) {
@@ -326,7 +334,7 @@ public class RealizarFactura extends JPanel{
 		SeleccionarConsumos panel = new SeleccionarConsumos(consumosAFacturar,this);
 		ventanaSeleccionarConsumos.setContentPane(panel);
 		ventanaSeleccionarConsumos.setSize(700,600);
-		ventanaSeleccionarConsumos.setLocationRelativeTo(null);
+		ventanaSeleccionarConsumos.setLocationRelativeTo(ventana);
 		App.getVentana().setEnabled(false);
 		ventana.setEnabled(false);
 
@@ -336,11 +344,10 @@ public class RealizarFactura extends JPanel{
 			public void actionPerformed(ActionEvent e) {
 				
 				ventanaSeleccionarConsumos.dispose();
+				App.getVentana().setVisible(true);
 				ventana.setEnabled(true);
-				ventana.setVisible(true);
-				
-					
-				}
+				ventana.setVisible(true);		
+			}
 			
 		});
 		
@@ -348,6 +355,7 @@ public class RealizarFactura extends JPanel{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				ventanaSeleccionarConsumos.dispose();
+				App.getVentana().setVisible(true);
 				ventana.setEnabled(true);
 				ventana.setVisible(true);
 			}
@@ -357,6 +365,7 @@ public class RealizarFactura extends JPanel{
 		
 		ventanaSeleccionarConsumos.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
+				App.getVentana().setVisible(true);
 				ventana.setEnabled(true);
 				ventana.setVisible(true);
 			}	
