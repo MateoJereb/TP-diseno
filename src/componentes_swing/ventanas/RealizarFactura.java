@@ -271,7 +271,7 @@ public class RealizarFactura extends JPanel{
 								App.getVentana().setEnabled(true);
 								App.getVentana().setVisible(true);
 								
-							}
+						}
 							
 						};
 						error.setListeners(listenerAceptar, null);
