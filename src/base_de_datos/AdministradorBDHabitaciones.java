@@ -97,7 +97,7 @@ public class AdministradorBDHabitaciones extends AdministradorBD {
 		ResultSet resultado = null;
 		
 		try {
-			sentencia = conexion.prepareStatement("SELECT * FROM tp_12c.habitacion");
+			sentencia = conexion.prepareStatement("SELECT * FROM tp_12c.habitacion ORDER BY 1");
 			resultado = sentencia.executeQuery();
 			
 			while(resultado.next()) {

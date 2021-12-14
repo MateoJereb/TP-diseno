@@ -129,17 +129,23 @@ public class GestorFacturas {
 		pasajero.setDepartamento(factura.getResponsable_fisico().get().getDireccion().getDepartamento());
 		pasajero.setPiso(factura.getResponsable_fisico().get().getDireccion().getPiso());
 		pasajero.setNumero(factura.getResponsable_fisico().get().getDireccion().getNumero());
-		estadia.setHora_entrada(factura.getEstadia().getHora_entrada());
-		estadia.setHora_salida(factura.getEstadia().getHora_salida());
-		estadia.setMonto(factura.getEstadia().getMonto());
+		if(factura.getEstadia().getHora_entrada() != null) estadia.setHora_entrada(factura.getEstadia().getHora_entrada());
+		if(factura.getEstadia().getHora_salida() != null)	estadia.setHora_salida(factura.getEstadia().getHora_salida());
+		if(factura.getEstadia().getMonto() != null)	estadia.setMonto(factura.getEstadia().getMonto());
 		
-		if(factura.getEstadia().getHabitacion().getClass() == HabitacionIndividual.class) habitacion = new HabitacionIndividualDTO();
-		if(factura.getEstadia().getHabitacion().getClass() == HabitacionDobleEstandar.class) habitacion = new HabitacionDobleEstandarDTO();
-		if(factura.getEstadia().getHabitacion().getClass() == HabitacionSuite.class) habitacion = new HabitacionSuiteDTO();
-		if(factura.getEstadia().getHabitacion().getClass() == HabitacionDobleSuperior.class) habitacion = new HabitacionDobleSuperiorDTO();
-		if(factura.getEstadia().getHabitacion().getClass() == HabitacionFamily.class) habitacion = new HabitacionFamilyDTO();
+		if(factura.getEstadia().getHabitacion() != null) {
+			if(factura.getEstadia().getHabitacion().getClass() == HabitacionIndividual.class) habitacion = new HabitacionIndividualDTO();
+			if(factura.getEstadia().getHabitacion().getClass() == HabitacionDobleEstandar.class) habitacion = new HabitacionDobleEstandarDTO();
+			if(factura.getEstadia().getHabitacion().getClass() == HabitacionSuite.class) habitacion = new HabitacionSuiteDTO();
+			if(factura.getEstadia().getHabitacion().getClass() == HabitacionDobleSuperior.class) habitacion = new HabitacionDobleSuperiorDTO();
+			if(factura.getEstadia().getHabitacion().getClass() == HabitacionFamily.class) habitacion = new HabitacionFamilyDTO();
+			
+			habitacion.setNro(factura.getEstadia().getHabitacion().getNro());
+		}
 		
-		habitacion.setNro(factura.getEstadia().getHabitacion().getNro());
+		
+		
+		
 		pasajero.setPosicion(factura.getResponsable_fisico().get().getPosicion_iva().getPosicion());
 		
 		for(ConsumoFacturado cons: factura.getConsumos()) {
@@ -155,7 +161,7 @@ public class GestorFacturas {
 			
 		}
 		
-		estadia.setHabitacion(habitacion);
+		if(habitacion != null) estadia.setHabitacion(habitacion);
 		
 		salida.setResponsable_fisico(pasajero);
 		salida.setEstadia(estadia);
@@ -186,17 +192,20 @@ public class GestorFacturas {
 		responsable.setDepartamento(factura.getResponsable_juridico().get().getDireccion().getDepartamento());
 		responsable.setPiso(factura.getResponsable_juridico().get().getDireccion().getPiso());
 		responsable.setNumero(factura.getResponsable_juridico().get().getDireccion().getNumero());
-		estadia.setHora_entrada(factura.getEstadia().getHora_entrada());
-		estadia.setHora_salida(factura.getEstadia().getHora_salida());
-		estadia.setMonto(factura.getEstadia().getMonto());
+		if(factura.getEstadia().getHora_entrada() != null) estadia.setHora_entrada(factura.getEstadia().getHora_entrada());
+		if(factura.getEstadia().getHora_salida() != null) estadia.setHora_salida(factura.getEstadia().getHora_salida());
+		if(factura.getEstadia().getMonto() != null) estadia.setMonto(factura.getEstadia().getMonto());
 		
-		if(factura.getEstadia().getHabitacion().getClass() == HabitacionIndividual.class) habitacion = new HabitacionIndividualDTO();
-		if(factura.getEstadia().getHabitacion().getClass() == HabitacionDobleEstandar.class) habitacion = new HabitacionDobleEstandarDTO();
-		if(factura.getEstadia().getHabitacion().getClass() == HabitacionSuite.class) habitacion = new HabitacionSuiteDTO();
-		if(factura.getEstadia().getHabitacion().getClass() == HabitacionDobleSuperior.class) habitacion = new HabitacionDobleSuperiorDTO();
-		if(factura.getEstadia().getHabitacion().getClass() == HabitacionFamily.class) habitacion = new HabitacionFamilyDTO();
+		if(factura.getEstadia().getHabitacion() != null) {
+			if(factura.getEstadia().getHabitacion().getClass() == HabitacionIndividual.class) habitacion = new HabitacionIndividualDTO();
+			if(factura.getEstadia().getHabitacion().getClass() == HabitacionDobleEstandar.class) habitacion = new HabitacionDobleEstandarDTO();
+			if(factura.getEstadia().getHabitacion().getClass() == HabitacionSuite.class) habitacion = new HabitacionSuiteDTO();
+			if(factura.getEstadia().getHabitacion().getClass() == HabitacionDobleSuperior.class) habitacion = new HabitacionDobleSuperiorDTO();
+			if(factura.getEstadia().getHabitacion().getClass() == HabitacionFamily.class) habitacion = new HabitacionFamilyDTO();
 		
-		habitacion.setNro(factura.getEstadia().getHabitacion().getNro());
+			habitacion.setNro(factura.getEstadia().getHabitacion().getNro());
+		}
+		
 		for(ConsumoFacturado cons: factura.getConsumos()) {
 			ConsumoFacturadoDTO consFactDTO= new ConsumoFacturadoDTO();
 			ConsumosDTO consDTO = new ConsumosDTO();
@@ -210,7 +219,7 @@ public class GestorFacturas {
 			
 		}
 		
-		estadia.setHabitacion(habitacion);
+		if(habitacion != null) estadia.setHabitacion(habitacion);
 		
 		salida.setResponsable_juridico(responsable);
 		salida.setEstadia(estadia);
