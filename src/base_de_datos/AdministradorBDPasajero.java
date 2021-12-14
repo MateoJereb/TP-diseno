@@ -35,7 +35,7 @@ public class AdministradorBDPasajero extends AdministradorBD {
 						+ " WHERE pj.id_tipo_documento = td.id_tipo_documento";
 					
 		
-		consulta += " AND pj.apellido LIKE '"+filtros.getApellido().get()+"%' AND pj.nombre LIKE '"+filtros.getNombre().get()+"%'";
+		consulta += " AND pj.apellido iLIKE '"+filtros.getApellido().get()+"%' AND pj.nombre iLIKE '"+filtros.getNombre().get()+"%'";
 		
 		if(filtros.getIdTipoDoc().isPresent()) {
 			consulta+=" AND pj.id_tipo_documento = "+filtros.getIdTipoDoc().get();

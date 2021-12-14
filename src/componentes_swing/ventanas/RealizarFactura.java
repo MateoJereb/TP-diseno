@@ -290,7 +290,7 @@ public class RealizarFactura extends JPanel{
 							
 						FacturaImpresion ventanaImpresion = new FacturaImpresion(App.getVentana(), panelFactura,facturaDTO);
 						
-						ventanaImpresion.setSize(570,800);
+						ventanaImpresion.setSize(570,720);
 						ventanaImpresion.setLocationRelativeTo(App.getVentana());
 						ventanaImpresion.setVisible(true);
 					}

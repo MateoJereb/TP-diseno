@@ -314,7 +314,7 @@ public class GenerarFactura extends JPanel{
 						realizarFactura();
 					}
 					else {
-						String mensaje =  "<html><body>El pasajero seleccionado es Menor.<br>Seleccione otro.</body></html>";
+						String mensaje =  "<html><body>La persona seleccionada es menor de edad.<br>Por favor eliga otra.</body></html>";
 						mostrarError(mensaje);
 
 					}
